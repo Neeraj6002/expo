@@ -1,6 +1,6 @@
 import { ScrollReveal } from './ScrollReveal';
 import { HighlightCard } from './HighlightCard';
-import { Shield, Bug, Target, Lock, Code, Cpu, AlertCircle } from 'lucide-react';
+import { Shield, Bug, Target, Lock, Code, Cpu, AlertCircle, XCircle } from 'lucide-react';
 
 const highlights = [
   {
@@ -28,6 +28,11 @@ const highlights = [
     icon: Cpu,
     title: 'Why browsers are a major target for hackers',
     description: 'Learn why attackers focus on users instead of systems.',
+  },
+    {
+    icon: XCircle,
+    title: 'Introduction to ethical hacking tools (conceptual)',
+    description: 'Understand how security professionals test browser security.',
   },
 
     {
