@@ -488,6 +488,8 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Phone</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">College</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Dept</th>
+                  <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Year</th>
+
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">IEEE</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Price</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Date</th>
