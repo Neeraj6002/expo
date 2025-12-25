@@ -11,7 +11,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // Supabase imports
-import { supabase } from "@/lib/supabase.ts";
+import { supabase } from "@/lib/supabase";
 
 
 interface FormData {
