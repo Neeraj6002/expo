@@ -1,5 +1,7 @@
 // Local storage utility for registrations (client-side only - not secure for production)
 
+// Local storage utility for registrations (client-side only - not secure for production)
+
 export interface Registration {
   id: string;
   fullName: string;
@@ -7,6 +9,7 @@ export interface Registration {
   phone: string;
   college: string;
   department: string;
+  year: string;
   isIEEEMember: boolean;
   price: number;
   registeredAt: string;
@@ -59,3 +62,4 @@ export const adminLogin = (password: string): boolean => {
 export const adminLogout = (): void => {
   sessionStorage.removeItem(ADMIN_KEY);
 };
+
