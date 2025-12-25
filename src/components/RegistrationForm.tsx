@@ -3,12 +3,15 @@ import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ScrollReveal } from './ScrollReveal';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 // Firebase imports
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+// Supabase imports
+import { supabase } from '@/lib/supabase';
 
 interface FormData {
   fullName: string;
@@ -33,6 +36,8 @@ export const RegistrationForm = () => {
     isIEEEMember: 'no',
     ieeeNumber: '',
   });
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -41,16 +46,98 @@ export const RegistrationForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File",
+          description: "Please upload an image file (PNG, JPG, JPEG)",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please upload an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setPaymentScreenshot(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeFile = () => {
+    setPaymentScreenshot(null);
+    setPreviewUrl(null);
+  };
+
+  const uploadImageToSupabase = async (file: File, registrationId: string): Promise<string> => {
+    try {
+      // Create a unique file name
+      const timestamp = Date.now();
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${registrationId}_${timestamp}.${fileExt}`;
+      const filePath = `payment-screenshots/${fileName}`;
+
+      // Upload file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('registrations') // Your bucket name
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('registrations')
+        .getPublicUrl(filePath);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Error uploading to Supabase:', error);
+      throw new Error('Failed to upload image');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate payment screenshot
+    if (!paymentScreenshot) {
+      toast({
+        title: "Payment Screenshot Required",
+        description: "Please upload your payment screenshot",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const isIEEE = formData.isIEEEMember === 'yes';
       const price = isIEEE ? 899 : 999;
 
-      // Store registration in Firebase Firestore
-      await addDoc(collection(db, 'registrations'), {
+      // First, create the registration document to get an ID
+      const docRef = await addDoc(collection(db, 'registrations'), {
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -61,7 +148,30 @@ export const RegistrationForm = () => {
         ieeeNumber: isIEEE ? formData.ieeeNumber : '',
         price,
         registeredAt: new Date().toISOString(),
-        createdAt: serverTimestamp(), // For server-side timestamp
+        createdAt: serverTimestamp(),
+        paymentStatus: 'pending', // Can be verified by admin
+        paymentScreenshotUrl: '', // Will be updated after upload
+      });
+
+      // Upload image to Supabase Storage
+      const imageUrl = await uploadImageToSupabase(paymentScreenshot, docRef.id);
+
+      // Update Firestore document with the Supabase image URL
+      await addDoc(collection(db, 'registrations'), {
+        id: docRef.id,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        college: formData.college,
+        department: formData.department,
+        year: formData.year,
+        isIEEEMember: isIEEE,
+        ieeeNumber: isIEEE ? formData.ieeeNumber : '',
+        price,
+        registeredAt: new Date().toISOString(),
+        createdAt: serverTimestamp(),
+        paymentStatus: 'pending',
+        paymentScreenshotUrl: imageUrl,
       });
 
       setIsSuccess(true);
@@ -84,6 +194,7 @@ export const RegistrationForm = () => {
           isIEEEMember: 'no',
           ieeeNumber: '',
         });
+        removeFile();
       }, 3000);
     } catch (error) {
       console.error('Error submitting registration:', error);
@@ -225,6 +336,80 @@ export const RegistrationForm = () => {
                 placeholder="Enter your IEEE membership number"
                 required={isIEEEMember}
               />
+            </motion.div>
+          )}
+        </div>
+
+        {/* Payment Screenshot Upload */}
+        <div className="relative group">
+          <label className="block text-sm text-muted-foreground mb-2 font-mono">
+            <span className="text-primary">&gt;</span> Payment Screenshot *
+          </label>
+          
+          {!previewUrl ? (
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="payment-screenshot"
+              />
+              <label
+                htmlFor="payment-screenshot"
+                className="flex flex-col items-center justify-center h-32 w-full rounded-md border-2 border-dashed border-border bg-card/50 px-4 py-6 text-center cursor-pointer transition-all duration-300 hover:border-primary hover:bg-card/70 hover:shadow-[0_0_15px_hsl(120_100%_50%/0.1)]"
+              >
+                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                <span className="text-sm font-mono text-muted-foreground">
+                  Click to upload payment screenshot
+                </span>
+                <span className="text-xs text-muted-foreground/60 mt-1">
+                  PNG, JPG or JPEG (Max 5MB)
+                </span>
+              </label>
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative rounded-md border-2 border-primary/20 bg-card/50 p-4 backdrop-blur-sm"
+            >
+              <div className="flex items-start gap-4">
+                <div className="relative h-24 w-24 flex-shrink-0 rounded-md overflow-hidden border-2 border-border">
+                  <img
+                    src={previewUrl}
+                    alt="Payment screenshot preview"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-mono text-foreground truncate">
+                        {paymentScreenshot?.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-mono mt-1">
+                        {(paymentScreenshot!.size / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeFile}
+                      className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="h-1.5 flex-1 bg-primary/20 rounded-full overflow-hidden">
+                      <div className="h-full w-full bg-primary rounded-full" />
+                    </div>
+                    <Check className="h-4 w-4 text-primary" />
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
         </div>
