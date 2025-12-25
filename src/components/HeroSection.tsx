@@ -70,7 +70,7 @@ export const HeroSection = () => {
         >
           <h1 
             className="text-4xl md:text-6xl lg:text-8xl font-display font-black text-primary neon-text-strong glitch flicker tracking-wider"
-            data-text="From Click to Control"
+            data-text="FROM CLICK TO CONTROL"
           >
             FROM CLICK TO CONTROL
           </h1>
