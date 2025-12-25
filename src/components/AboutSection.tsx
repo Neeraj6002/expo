@@ -12,7 +12,7 @@ export const AboutSection = () => {
               <span>./about</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-4">
-              About <span className="text-primary neon-text">sSBMCET2025-26</span>
+              About <span className="text-primary neon-text">FROM CLICK TO CONTROL</span>
             </h2>
           </div>
         </ScrollReveal>
