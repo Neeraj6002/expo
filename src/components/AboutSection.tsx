@@ -12,7 +12,7 @@ export const AboutSection = () => {
               <span>./about</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-4">
-              About <span className="text-primary neon-text">From Click to Control</span>
+              About <span className="text-primary neon-text">sSBMCET2025-26</span>
             </h2>
           </div>
         </ScrollReveal>
@@ -24,23 +24,47 @@ export const AboutSection = () => {
               <div className="w-3 h-3 rounded-full bg-destructive" />
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
               <div className="w-3 h-3 rounded-full bg-primary" />
-              <span className="ml-4 text-muted-foreground font-mono text-sm">From Click to Control@terminal:~</span>
+              <span className="ml-4 text-muted-foreground font-mono text-sm">AKCSSC@terminal:~</span>
             </div>
 
             {/* Content */}
             <div className="space-y-6 font-mono text-base leading-relaxed">
               <p className="text-muted-foreground">
-                <span className="text-primary">$</span> cat about.txt
+                <span className="text-primary">$</span> cat event-info.txt
               </p>
+              
+              <div className="space-y-3 text-foreground">
+                <p>
+                  <span className="text-primary font-bold">Hosted By:</span> IEEE SB MCET
+                </p>
+                <p>
+                  <span className="text-primary font-bold">Date:</span> January 4, 2025
+                </p>
+                <p>
+                  <span className="text-primary font-bold">Location:</span> Mohandas College
+                </p>
+                <p>
+                  <span className="text-primary font-bold">Contact:</span> <a href="https://wa.me/918075327095" target="_blank">
+  <button>
+Anantha Padmanabhan P</button>
+</a>
+                </p>
+                <p>
+                  <span className="text-transparent font-bold">Contact:</span> <a href="https://wa.me/918075327095" target="_blank">
+  <button>
+Vivekanand V S</button>
+</a>
+                </p>
+              </div>
+
+              <div className="border-t border-border pt-4 mt-6">
+  
+              </div>
+
               <p className="text-foreground">
-                <span className="text-primary font-bold">From Click to Control: </span>Browser Hacking is an immersive cybersecurity workshop focused on revealing what truly happens behind the scenes when users interact with web browsers. Designed for students, aspiring ethical hackers, and technology enthusiasts, this event explores how simple actions like clicking a link or visiting a website can expose users to serious security threats.
+             <span className="text-primary">  From Click to Control:</span> Browser Hacking is an immersive cybersecurity workshop that reveals what happens behind the scenes when users interact with web browsers. Designed for students and aspiring ethical hackers, it explores common browser-based attacks, the attacker’s mindset, and real-world exploitation through live demos. Built on the philosophy “Break to Build Better Security,” the session combines ethical, hands-on learning with practical defense techniques to help participants understand threats and protect themselves online.
               </p>
-              <p className="text-foreground">
-               In today’s digital landscape, browsers have become one of the most targeted attack surfaces. This workshop dives into the attacker’s mindset, explaining common browser-based attacks in a simple and ethical manner. Through live demonstrations and real-world scenarios, participants will visually understand how attackers exploit browser behavior and why users are often the primary target rather than systems.
-              </p>
-              <p className="text-foreground">
-                Built on the philosophy “Break to Build Better Security,” From Click to Control combines conceptual knowledge with hands-on learning in a safe lab environment. Participants will gain insights into ethical hacking tools, learn essential browser defense techniques, and leave with practical skills to better protect themselves in the online world.
-              </p>
+
               <p className="text-muted-foreground">
                 <span className="text-primary">$</span> <span className="animate-pulse">_</span>
               </p>
