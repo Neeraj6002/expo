@@ -23,6 +23,11 @@ export default defineConfig(({ mode }) => ({
     },
   },
 
+  // ✅ Fix for Supabase build issue
+  optimizeDeps: {
+    include: ['@supabase/supabase-js']
+  },
+
   build: {
     // ✅ Silence chunk warning
     chunkSizeWarningLimit: 1500,
@@ -33,9 +38,9 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           react: ["react", "react-dom"],
           vendor: ["react-router-dom"],
+          supabase: ["@supabase/supabase-js"],
         },
       },
     },
   },
 }));
-
