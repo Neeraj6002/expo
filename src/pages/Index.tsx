@@ -39,8 +39,8 @@ const Index = () => {
               transition={{ duration: 0.5 }}
               className="text-center"
             >
-              <h1 className="text-4xl md:text-6xl font-display font-black text-primary neon-text-strong glitch" data-text="XPLOITIX">
-                XPLOITIX
+              <h1 className="text-4xl md:text-6xl font-display font-black text-primary neon-text-strong glitch" data-text="Click to Control">
+                Click to Control
               </h1>
               <motion.div
                 initial={{ width: 0 }}
