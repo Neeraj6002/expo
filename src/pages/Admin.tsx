@@ -15,7 +15,11 @@ import {
   ArrowLeft,
   RefreshCw,
   Crown,
-  User
+  User,
+  Check,
+  X,
+  Download,
+  Search
 } from 'lucide-react';
 
 // Firebase imports
@@ -33,7 +37,8 @@ import {
   deleteDoc, 
   doc,
   query,
-  orderBy 
+  orderBy,
+  updateDoc
 } from 'firebase/firestore';
 
 interface Registration {
@@ -47,6 +52,7 @@ interface Registration {
   ieeeNumber?: string;
   price: number;
   registeredAt: string;
+  approved?: boolean;
 }
 
 const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
@@ -111,7 +117,6 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
       className="w-full max-w-md mx-auto"
     >
       <div className="relative bg-card/80 border-2 border-border rounded-lg p-8 backdrop-blur-sm">
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-primary" />
         <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-primary" />
         <div className="absolute bottom-0 left-0 w-6 h-6 border-l-2 border-b-2 border-primary" />
@@ -167,7 +172,6 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
           </Button>
         </form>
 
-        {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-border"></div>
@@ -177,7 +181,6 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
           </div>
         </div>
 
-        {/* Google Sign In */}
         <Button
           type="button"
           variant="outline"
@@ -216,7 +219,9 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
 
 const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [filteredRegistrations, setFilteredRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -232,6 +237,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       });
       
       setRegistrations(regs);
+      setFilteredRegistrations(regs);
     } catch (error) {
       console.error('Error loading registrations:', error);
       toast({
@@ -247,6 +253,47 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   useEffect(() => {
     loadRegistrations();
   }, []);
+
+  useEffect(() => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) {
+      setFilteredRegistrations(registrations);
+      return;
+    }
+
+    const filtered = registrations.filter((reg) => {
+      return (
+        reg.fullName.toLowerCase().includes(query) ||
+        reg.email.toLowerCase().includes(query) ||
+        reg.phone.includes(query) ||
+        reg.college.toLowerCase().includes(query) ||
+        (reg.department?.toLowerCase().includes(query)) ||
+        (reg.ieeeNumber?.includes(query))
+      );
+    });
+
+    setFilteredRegistrations(filtered);
+  }, [searchQuery, registrations]);
+
+  const handleApprovalToggle = async (id: string, currentStatus: boolean, name: string) => {
+    try {
+      await updateDoc(doc(db, 'registrations', id), {
+        approved: !currentStatus
+      });
+      await loadRegistrations();
+      toast({
+        title: !currentStatus ? 'Registration Approved' : 'Approval Revoked',
+        description: `${name}'s registration has been ${!currentStatus ? 'approved' : 'unapproved'}.`,
+      });
+    } catch (error) {
+      console.error('Error updating approval:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update approval status.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete ${name}'s registration?`)) {
@@ -270,6 +317,54 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
     }
   };
 
+  const handleExportCSV = () => {
+    const headers = [
+      'Name',
+      'Email',
+      'Phone',
+      'College',
+      'Department/Year',
+      'IEEE Member',
+      'IEEE Number',
+      'Price',
+      'Approved',
+      'Registration Date'
+    ];
+
+    const rows = filteredRegistrations.map((reg) => [
+      reg.fullName,
+      reg.email,
+      reg.phone,
+      reg.college,
+      reg.department || 'N/A',
+      reg.isIEEEMember ? 'Yes' : 'No',
+      reg.ieeeNumber || 'N/A',
+      reg.price,
+      reg.approved ? 'Yes' : 'No',
+      new Date(reg.registeredAt).toLocaleString()
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `xploitix_registrations_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: 'CSV Exported',
+      description: `Exported ${filteredRegistrations.length} registration(s) to CSV.`,
+    });
+  };
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -286,6 +381,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const totalRevenue = registrations.reduce((sum, r) => sum + r.price, 0);
   const ieeeCount = registrations.filter(r => r.isIEEEMember).length;
   const nonIeeeCount = registrations.length - ieeeCount;
+  const approvedCount = registrations.filter(r => r.approved).length;
 
   return (
     <motion.div
@@ -318,9 +414,10 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         {[
           { label: 'Total Registrations', value: registrations.length, icon: Users },
+          { label: 'Approved', value: approvedCount, icon: Check },
           { label: 'IEEE Members', value: ieeeCount, icon: Crown },
           { label: 'Non-IEEE', value: nonIeeeCount, icon: User },
           { label: 'Total Revenue', value: `₹${totalRevenue}`, icon: Users },
@@ -338,8 +435,31 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
 
       {/* Registrations Table */}
       <div className="bg-card/50 border border-border rounded-lg backdrop-blur-sm overflow-hidden">
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-lg font-display font-bold text-foreground">All Registrations</h2>
+          <Button variant="cyber" size="sm" onClick={handleExportCSV} disabled={registrations.length === 0}>
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="p-4 border-b border-border">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by name, email, phone, college, department, or IEEE number..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          {searchQuery && (
+            <p className="text-xs text-muted-foreground font-mono mt-2">
+              Found {filteredRegistrations.length} result(s)
+            </p>
+          )}
         </div>
 
         {loading ? (
@@ -347,10 +467,12 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
             <RefreshCw className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />
             <p className="text-muted-foreground font-mono">Loading registrations...</p>
           </div>
-        ) : registrations.length === 0 ? (
+        ) : filteredRegistrations.length === 0 ? (
           <div className="p-12 text-center">
             <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground font-mono">No registrations yet</p>
+            <p className="text-muted-foreground font-mono">
+              {searchQuery ? 'No registrations match your search' : 'No registrations yet'}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -365,12 +487,13 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">IEEE</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Price</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Date</th>
+                  <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Status</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <AnimatePresence>
-                  {registrations.map((reg) => (
+                  {filteredRegistrations.map((reg) => (
                     <motion.tr
                       key={reg.id}
                       initial={{ opacity: 0 }}
@@ -402,6 +525,26 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                       <td className="p-4 text-sm font-mono text-primary">₹{reg.price}</td>
                       <td className="p-4 text-xs font-mono text-muted-foreground">
                         {new Date(reg.registeredAt).toLocaleDateString()}
+                      </td>
+                      <td className="p-4">
+                        <Button
+                          variant={reg.approved ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleApprovalToggle(reg.id, reg.approved || false, reg.fullName)}
+                          className={reg.approved ? "bg-green-600 hover:bg-green-700" : ""}
+                        >
+                          {reg.approved ? (
+                            <>
+                              <Check className="w-4 h-4 mr-1" />
+                              Approved
+                            </>
+                          ) : (
+                            <>
+                              <X className="w-4 h-4 mr-1" />
+                              Pending
+                            </>
+                          )}
+                        </Button>
                       </td>
                       <td className="p-4">
                         <Button
@@ -450,7 +593,6 @@ const Admin = () => {
     <div className="min-h-screen bg-background relative overflow-hidden">
       <CyberBackground />
       
-      {/* Scanlines overlay */}
       <div className="fixed inset-0 pointer-events-none scanlines opacity-[0.02] z-10" />
 
       <div className="relative z-20 min-h-screen flex items-center justify-center p-4 sm:p-8">
