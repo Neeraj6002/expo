@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 
 // Firebase imports
 import { db } from '@/lib/firebase';
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // Supabase imports
 import { supabase } from "@/lib/supabase";
@@ -94,7 +94,7 @@ export const RegistrationForm = () => {
       const filePath = `payment-screenshots/${fileName}`;
 
       // Upload file to Supabase Storage
-      const { error } = await supabase.storage
+      const { data, error } = await supabase.storage
         .from('registrations')
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -133,10 +133,17 @@ export const RegistrationForm = () => {
     setIsSubmitting(true);
 
     try {
-      const isIEEE = formData.isIEEEMember === 'yes';
-      const price = isIEEE ? 899 : 999;
+      // Calculate price based on membership type
+      let price = 999; // Default non-member price
+      if (formData.isIEEEMember === 'ieee') {
+        price = 899;
+      } else if (formData.isIEEEMember === 'ieee-cs') {
+        price = 699;
+      }
 
-      // First, create the registration document
+      const isIEEE = formData.isIEEEMember !== 'no';
+
+      // First, create the registration document to get an ID
       const docRef = await addDoc(collection(db, 'registrations'), {
         fullName: formData.fullName,
         email: formData.email,
@@ -145,6 +152,7 @@ export const RegistrationForm = () => {
         department: formData.department,
         year: formData.year,
         isIEEEMember: isIEEE,
+        membershipType: formData.isIEEEMember,
         ieeeNumber: isIEEE ? formData.ieeeNumber : '',
         price,
         registeredAt: new Date().toISOString(),
@@ -156,8 +164,22 @@ export const RegistrationForm = () => {
       // Upload image to Supabase Storage
       const imageUrl = await uploadImageToSupabase(paymentScreenshot, docRef.id);
 
-      // Update the Firestore document with the image URL
-      await updateDoc(doc(db, 'registrations', docRef.id), {
+      // Update Firestore document with the Supabase image URL
+      await addDoc(collection(db, 'registrations'), {
+        id: docRef.id,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        college: formData.college,
+        department: formData.department,
+        year: formData.year,
+        isIEEEMember: isIEEE,
+        membershipType: formData.isIEEEMember,
+        ieeeNumber: isIEEE ? formData.ieeeNumber : '',
+        price,
+        registeredAt: new Date().toISOString(),
+        createdAt: serverTimestamp(),
+        paymentStatus: 'pending',
         paymentScreenshotUrl: imageUrl,
       });
 
@@ -195,11 +217,18 @@ export const RegistrationForm = () => {
     }
   };
 
-  const isIEEEMember = formData.isIEEEMember === 'yes';
+  const isIEEEMember = formData.isIEEEMember !== 'no';
+  
+  // Calculate price dynamically
+  const getPrice = () => {
+    if (formData.isIEEEMember === 'ieee') return 899;
+    if (formData.isIEEEMember === 'ieee-cs') return 699;
+    return 999;
+  };
 
   return (
     <ScrollReveal>
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
           <div className="relative group">
@@ -242,8 +271,6 @@ export const RegistrationForm = () => {
               onChange={handleInputChange}
               placeholder="Enter phone number"
               required
-              pattern="[0-9]{10}"
-              title="Please enter a valid 10-digit phone number"
             />
           </div>
 
@@ -275,18 +302,28 @@ export const RegistrationForm = () => {
             />
           </div>
 
-          {/* Year */}
+          {/* Year - Changed to Dropdown */}
           <div className="relative group">
             <label className="block text-sm text-muted-foreground mb-2 font-mono">
-              <span className="text-primary">&gt;</span> Year
+              <span className="text-primary">&gt;</span> Semester
             </label>
-            <Input
+            <select
               name="year"
               value={formData.year}
               onChange={handleInputChange}
-              placeholder="e.g., 1st, 2nd, 3rd, 4th"
               required
-            />
+              className="flex h-12 w-full rounded-md border-2 border-border bg-card px-4 py-2 text-base text-foreground font-mono ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:border-primary focus-visible:shadow-[0_0_15px_hsl(120_100%_50%/0.2)] md:text-sm appearance-none cursor-pointer"
+            >
+              <option value="">Select semester</option>
+              <option value="S1">S1</option>
+              <option value="S2">S2</option>
+              <option value="S3">S3</option>
+              <option value="S4">S4</option>
+              <option value="S5">S5</option>
+              <option value="S6">S6</option>
+              <option value="S7">S7</option>
+              <option value="S8">S8</option>
+            </select>
           </div>
 
           {/* IEEE Member */}
@@ -300,8 +337,9 @@ export const RegistrationForm = () => {
               onChange={handleInputChange}
               className="flex h-12 w-full rounded-md border-2 border-border bg-card px-4 py-2 text-base text-foreground font-mono ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:border-primary focus-visible:shadow-[0_0_15px_hsl(120_100%_50%/0.2)] md:text-sm appearance-none cursor-pointer"
             >
-              <option value="no">No (₹999)</option>
-              <option value="yes">Yes (₹899)</option>
+              <option value="no">Not a IEEE member (₹999)</option>
+              <option value="ieee">IEEE member (₹899)</option>
+              <option value="ieee-cs">IEEE CS member (₹699)</option>
             </select>
           </div>
 
@@ -342,6 +380,32 @@ export const RegistrationForm = () => {
                 className="hidden"
                 id="payment-screenshot"
               />
+
+                     {/* Price Display */}
+        <motion.div
+          className="bg-card/50 border-2 border-primary/20 rounded-lg p-4 mb-4 backdrop-blur-sm"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-mono text-muted-foreground">Registration Fee:</span>
+            <span className="text-2xl font-display font-bold text-primary">
+              ₹{getPrice()}
+            </span>
+          </div>
+          {formData.isIEEEMember === 'ieee' && (
+            <p className="text-xs text-green-500 font-mono mt-2">
+              ✓ IEEE Member Discount Applied (₹100 off)
+            </p>
+          )}
+          {formData.isIEEEMember === 'ieee-cs' && (
+            <p className="text-xs text-green-500 font-mono mt-2">
+              ✓ IEEE CS Member Discount Applied (₹300 off)
+            </p>
+          )}
+        </motion.div>
+
+
               <label
                 htmlFor="payment-screenshot"
                 className="flex flex-col items-center justify-center h-32 w-full rounded-md border-2 border-dashed border-border bg-card/50 px-4 py-6 text-center cursor-pointer transition-all duration-300 hover:border-primary hover:bg-card/70 hover:shadow-[0_0_15px_hsl(120_100%_50%/0.1)]"
@@ -401,24 +465,7 @@ export const RegistrationForm = () => {
           )}
         </div>
 
-        {/* Price Display */}
-        <motion.div
-          className="bg-card/50 border-2 border-primary/20 rounded-lg p-4 backdrop-blur-sm"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-mono text-muted-foreground">Registration Fee:</span>
-            <span className="text-2xl font-display font-bold text-primary">
-              ₹{isIEEEMember ? '899' : '999'}
-            </span>
-          </div>
-          {isIEEEMember && (
-            <p className="text-xs text-green-500 font-mono mt-2">
-              ✓ IEEE Member Discount Applied
-            </p>
-          )}
-        </motion.div>
+ 
 
         {/* Submit Button */}
         <div className="pt-4">
@@ -427,11 +474,12 @@ export const RegistrationForm = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Button
-              type="submit"
+              type="button"
               variant="cyber"
               size="xl"
               className="w-full"
               disabled={isSubmitting || isSuccess}
+              onClick={handleSubmit}
             >
               {isSubmitting ? (
                 <>
@@ -460,7 +508,7 @@ export const RegistrationForm = () => {
           Secure connection established
           <span className="text-primary">]</span>
         </p>
-      </form>
+      </div>
     </ScrollReveal>
   );
 };
