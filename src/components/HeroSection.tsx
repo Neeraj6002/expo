@@ -7,6 +7,7 @@ import { ChevronDown } from 'lucide-react';
 import ieeeLogo from '@/assets/ieee-logo.png';
 import offensoLogo from '@/assets/offenso-logo.png';
 import sbMcetLogo from '@/assets/sb-mcet-logo.png';
+import cssbc from '@/assets/cssbc.png';
 
 export const HeroSection = () => {
   const scrollToRegister = () => {
@@ -57,9 +58,10 @@ export const HeroSection = () => {
           transition={{ duration: 0.6 }}
           className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-12"
         >
-          <img src={sbMcetLogo} alt="IEEE SB MCET" className="h-7 md:h-9 object-contain" />
-          <img src={offensoLogo} alt="Offenso Hackers Academy" className="h-7 md:h-9 object-contain" />
-          <img src={ieeeLogo} alt="IEEE" className="h-7 md:h-9 object-contain" />
+          <img src={sbMcetLogo} alt="IEEE SB MCET" className="h-5 md:h-9 object-contain" />
+           <img src={cssbc} alt="IEEE" className="h-5 md:h-9 object-contain" />
+          <img src={offensoLogo} alt="Offenso Hackers Academy" className="h-5 md:h-9 object-contain" />
+          <img src={ieeeLogo} alt="IEEE" className="h-5 md:h-9 object-contain" />
         </motion.div>
         {/* Main Title with Glitch Effect */}
         <motion.div
