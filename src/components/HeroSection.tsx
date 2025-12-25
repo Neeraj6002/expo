@@ -51,17 +51,16 @@ export const HeroSection = () => {
 
       <div className="relative z-10 text-center max-w-5xl mx-auto">
         {/* Logos */}
-  <motion.div
+ <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-12"
         >
-          <img src={sbMcetLogo} alt="IEEE SB MCET" className="h-8 md:h-10 object-contain" />
-          <img src={offensoLogo} alt="Offenso Hackers Academy" className="h-8 md:h-10 object-contain" />
-          <img src={ieeeLogo} alt="IEEE" className="h-8 md:h-10 object-contain" />
+          <img src={sbMcetLogo} alt="IEEE SB MCET" className="h-7 md:h-9 object-contain" />
+          <img src={offensoLogo} alt="Offenso Hackers Academy" className="h-7 md:h-9 object-contain" />
+          <img src={ieeeLogo} alt="IEEE" className="h-7 md:h-9 object-contain" />
         </motion.div>
-
         {/* Main Title with Glitch Effect */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -169,3 +168,4 @@ export const HeroSection = () => {
     </section>
   );
 };
+
