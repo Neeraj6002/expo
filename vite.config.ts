@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-base: process.env.BASE_PATH || "/xplor",
+base: process.env.BASE_PATH || "/expo",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
