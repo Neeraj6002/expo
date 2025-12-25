@@ -19,7 +19,9 @@ import {
   Check,
   X,
   Download,
-  Search
+  Search,
+  ImageIcon,
+  ZoomIn
 } from 'lucide-react';
 
 // Firebase imports
@@ -54,7 +56,46 @@ interface Registration {
   price: number;
   registeredAt: string;
   approved?: boolean;
+  paymentScreenshotUrl?: string;
 }
+
+const ImageModal = ({ imageUrl, onClose }: { imageUrl: string; onClose: () => void }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.9 }}
+        className="relative max-w-4xl max-h-[90vh] bg-card border-2 border-primary rounded-lg overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="absolute top-4 right-4 z-10">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={onClose}
+            className="rounded-full"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="overflow-auto max-h-[90vh]">
+          <img
+            src={imageUrl}
+            alt="Payment screenshot"
+            className="w-full h-auto"
+          />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
   const [email, setEmail] = useState('');
@@ -129,7 +170,7 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
           <p className="text-sm text-muted-foreground font-mono mt-2">Enter credentials to continue</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Input
               type="email"
@@ -168,10 +209,10 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
             </motion.p>
           )}
 
-          <Button type="submit" variant="cyber" className="w-full" disabled={loading || googleLoading}>
+          <Button type="button" onClick={handleSubmit} variant="cyber" className="w-full" disabled={loading || googleLoading}>
             {loading ? 'Authenticating...' : 'Access Panel'}
           </Button>
-        </form>
+        </div>
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
@@ -223,6 +264,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [filteredRegistrations, setFilteredRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -331,7 +373,8 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       'IEEE Number',
       'Price',
       'Approved',
-      'Registration Date'
+      'Registration Date',
+      'Payment Screenshot URL'
     ];
 
     const rows = filteredRegistrations.map((reg) => [
@@ -345,7 +388,8 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       reg.ieeeNumber || 'N/A',
       reg.price,
       reg.approved ? 'Yes' : 'No',
-      new Date(reg.registeredAt).toLocaleString()
+      new Date(reg.registeredAt).toLocaleString(),
+      reg.paymentScreenshotUrl || 'N/A'
     ]);
 
     const csvContent = [
@@ -391,13 +435,19 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full max-w-6xl mx-auto"
+      className="w-full max-w-7xl mx-auto"
     >
+      <AnimatePresence>
+        {selectedImage && (
+          <ImageModal imageUrl={selectedImage} onClose={() => setSelectedImage(null)} />
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground">
-            <span className="text-primary">XPLOITIX</span> Admin
+            <span className="text-primary">Click to Control</span> Admin
           </h1>
           <p className="text-sm text-muted-foreground font-mono mt-1">Registration Dashboard</p>
         </div>
@@ -489,13 +539,12 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">College</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Dept</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Year</th>
-
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">IEEE</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Price</th>
+                  <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Payment</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Date</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Status</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Actions</th>
-                  
                 </tr>
               </thead>
               <tbody>
@@ -531,6 +580,24 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                         )}
                       </td>
                       <td className="p-4 text-sm font-mono text-primary">₹{reg.price}</td>
+                      <td className="p-4">
+                        {reg.paymentScreenshotUrl ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedImage(reg.paymentScreenshotUrl!)}
+                            className="text-primary hover:text-primary hover:bg-primary/10"
+                          >
+                            <ZoomIn className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                        ) : (
+                          <span className="text-xs font-mono text-muted-foreground flex items-center gap-1">
+                            <ImageIcon className="w-3 h-3" />
+                            None
+                          </span>
+                        )}
+                      </td>
                       <td className="p-4 text-xs font-mono text-muted-foreground">
                         {new Date(reg.registeredAt).toLocaleDateString()}
                       </td>
