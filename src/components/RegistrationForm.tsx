@@ -8,11 +8,10 @@ import { useToast } from '@/hooks/use-toast';
 
 // Firebase imports
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 
 // Supabase imports
 import { supabase } from "@/lib/supabase";
-
 
 interface FormData {
   fullName: string;
@@ -95,8 +94,8 @@ export const RegistrationForm = () => {
       const filePath = `payment-screenshots/${fileName}`;
 
       // Upload file to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('registrations') // Your bucket name
+      const { error } = await supabase.storage
+        .from('registrations')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -137,7 +136,7 @@ export const RegistrationForm = () => {
       const isIEEE = formData.isIEEEMember === 'yes';
       const price = isIEEE ? 899 : 999;
 
-      // First, create the registration document to get an ID
+      // First, create the registration document
       const docRef = await addDoc(collection(db, 'registrations'), {
         fullName: formData.fullName,
         email: formData.email,
@@ -150,28 +149,15 @@ export const RegistrationForm = () => {
         price,
         registeredAt: new Date().toISOString(),
         createdAt: serverTimestamp(),
-        paymentStatus: 'pending', // Can be verified by admin
-        paymentScreenshotUrl: '', // Will be updated after upload
+        paymentStatus: 'pending',
+        paymentScreenshotUrl: '',
       });
 
       // Upload image to Supabase Storage
       const imageUrl = await uploadImageToSupabase(paymentScreenshot, docRef.id);
 
-      // Update Firestore document with the Supabase image URL
-      await addDoc(collection(db, 'registrations'), {
-        id: docRef.id,
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        college: formData.college,
-        department: formData.department,
-        year: formData.year,
-        isIEEEMember: isIEEE,
-        ieeeNumber: isIEEE ? formData.ieeeNumber : '',
-        price,
-        registeredAt: new Date().toISOString(),
-        createdAt: serverTimestamp(),
-        paymentStatus: 'pending',
+      // Update the Firestore document with the image URL
+      await updateDoc(doc(db, 'registrations', docRef.id), {
         paymentScreenshotUrl: imageUrl,
       });
 
