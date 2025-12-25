@@ -24,7 +24,7 @@ export const AboutSection = () => {
               <div className="w-3 h-3 rounded-full bg-destructive" />
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
               <div className="w-3 h-3 rounded-full bg-primary" />
-              <span className="ml-4 text-muted-foreground font-mono text-sm">AKCSSC@terminal:~</span>
+              <span className="ml-4 text-muted-foreground font-mono text-sm">IEEE SB MCET@terminal:~</span>
             </div>
 
             {/* Content */}
