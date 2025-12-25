@@ -48,6 +48,7 @@ interface Registration {
   phone: string;
   college: string;
   department?: string;
+  year?: string;
   isIEEEMember: boolean;
   ieeeNumber?: string;
   price: number;
@@ -268,6 +269,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
         reg.phone.includes(query) ||
         reg.college.toLowerCase().includes(query) ||
         (reg.department?.toLowerCase().includes(query)) ||
+        (reg.year?.toLowerCase().includes(query)) ||
         (reg.ieeeNumber?.includes(query))
       );
     });
@@ -323,7 +325,8 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       'Email',
       'Phone',
       'College',
-      'Department/Year',
+      'Department',
+      'Year',
       'IEEE Member',
       'IEEE Number',
       'Price',
@@ -337,6 +340,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       reg.phone,
       reg.college,
       reg.department || 'N/A',
+      reg.year || 'N/A',
       reg.isIEEEMember ? 'Yes' : 'No',
       reg.ieeeNumber || 'N/A',
       reg.price,
@@ -483,12 +487,13 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Email</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Phone</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">College</th>
-                  <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Dept/Year</th>
+                  <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Dept</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">IEEE</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Price</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Date</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Status</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Actions</th>
+                  
                 </tr>
               </thead>
               <tbody>
@@ -506,6 +511,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                       <td className="p-4 text-sm font-mono text-muted-foreground">{reg.phone}</td>
                       <td className="p-4 text-sm font-mono text-muted-foreground">{reg.college}</td>
                       <td className="p-4 text-sm font-mono text-muted-foreground">{reg.department || 'N/A'}</td>
+                      <td className="p-4 text-sm font-mono text-muted-foreground">{reg.year || 'N/A'}</td>
                       <td className="p-4">
                         {reg.isIEEEMember ? (
                           <div className="flex flex-col">
