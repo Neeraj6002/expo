@@ -5,34 +5,40 @@ import { Shield, Bug, Target, Lock, Code, Cpu } from 'lucide-react';
 const highlights = [
   {
     icon: Shield,
-    title: 'Ethical Hacking Basics',
-    description: 'Learn the fundamentals of ethical hacking, including reconnaissance, scanning, and exploitation techniques used by security professionals.',
+    title: 'Understand how browsers really work',
+    description: 'Learn what happens behind the scenes when you click a link or open a website.',
   },
 
   {
     icon: Target,
-    title: 'Attack Simulations',
-    description: 'Experience real-world attack scenarios in controlled environments. Learn how attackers think and operate.',
+    title: 'How attackers think – step by step',
+    description: 'Explore the mindset of hackers in a safe and ethical way.',
   },
   {
     icon: Lock,
-    title: 'Defensive Techniques',
-    description: 'Master defensive security measures, including firewall configuration, intrusion detection, and incident response.',
+    title: 'Common browser-based attacks explained simply',
+    description: 'See how small user actions can lead to big security risks.',
   },
   {
     icon: Code,
-    title: 'Vulnerability Assessment',
-    description: 'Learn to identify and assess vulnerabilities in systems, networks, and applications using industry-standard tools.',
+    title: 'Live demonstration of browser exploitation concepts',
+    description: 'Watch real-time examples to understand attacks visually.',
   },
   {
     icon: Cpu,
-    title: 'Hands-on Labs',
-    description: 'Practice your skills in interactive lab sessions with real tools and techniques used by cybersecurity professionals.',
+    title: 'Why browsers are a major target for hackers',
+    description: 'Learn why attackers focus on users instead of systems.',
+  },
+
+    {
+    icon: Bug,
+    title: 'How to protect yourself from browser attacks',
+    description: 'Learn basic defense techniques every user should know.',
   },
     {
     icon: Bug,
-    title: 'Cybersecurity Threats',
-    description: 'Understand modern cyber threats including malware, phishing, social engineering, and how to identify and prevent them.',
+    title: 'Hands-on learning in a safe lab environment',
+    description: 'Practice concepts without harming real systems.',
   },
 ];
 
@@ -70,4 +76,5 @@ export const HighlightsSection = () => {
     </section>
   );
 };
+
 
