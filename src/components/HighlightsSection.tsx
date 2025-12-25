@@ -8,11 +8,7 @@ const highlights = [
     title: 'Ethical Hacking Basics',
     description: 'Learn the fundamentals of ethical hacking, including reconnaissance, scanning, and exploitation techniques used by security professionals.',
   },
-  {
-    icon: Bug,
-    title: 'Cybersecurity Threats',
-    description: 'Understand modern cyber threats including malware, phishing, social engineering, and how to identify and prevent them.',
-  },
+
   {
     icon: Target,
     title: 'Attack Simulations',
@@ -32,6 +28,11 @@ const highlights = [
     icon: Cpu,
     title: 'Hands-on Labs',
     description: 'Practice your skills in interactive lab sessions with real tools and techniques used by cybersecurity professionals.',
+  },
+    {
+    icon: Bug,
+    title: 'Cybersecurity Threats',
+    description: 'Understand modern cyber threats including malware, phishing, social engineering, and how to identify and prevent them.',
   },
 ];
 
@@ -69,3 +70,4 @@ export const HighlightsSection = () => {
     </section>
   );
 };
+
