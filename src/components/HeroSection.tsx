@@ -72,7 +72,7 @@ export const HeroSection = () => {
             className="text-4xl md:text-6xl lg:text-8xl font-display font-black text-primary neon-text-strong glitch flicker tracking-wider"
             data-text="From Click to Control"
           >
-            From Click to Control
+            FROM CLICK TO CONTROL
           </h1>
         </motion.div>
 
@@ -168,4 +168,3 @@ export const HeroSection = () => {
     </section>
   );
 };
-
