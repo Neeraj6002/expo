@@ -33,22 +33,13 @@ export const AboutSection = () => {
                 <span className="text-primary">$</span> cat about.txt
               </p>
               <p className="text-foreground">
-                <span className="text-primary font-bold">From Click to Control</span> is an immersive cybersecurity 
-                experience designed for aspiring ethical hackers and security enthusiasts. This 
-                event brings together students, professionals, and experts to explore the fascinating 
-                world of cybersecurity.
+                <span className="text-primary font-bold">From Click to Control: </span>Browser Hacking is an immersive cybersecurity workshop focused on revealing what truly happens behind the scenes when users interact with web browsers. Designed for students, aspiring ethical hackers, and technology enthusiasts, this event explores how simple actions like clicking a link or visiting a website can expose users to serious security threats.
               </p>
               <p className="text-foreground">
-                In today's digital age, understanding security isn't just an advantage—it's a 
-                necessity. At From Click to Control, you'll learn to think like a hacker while defending like 
-                a pro. Our motto, <span className="text-primary">"Break to Build Better Security"</span>, 
-                embodies the ethical hacking mindset: understanding vulnerabilities to create 
-                stronger defenses.
+               In today’s digital landscape, browsers have become one of the most targeted attack surfaces. This workshop dives into the attacker’s mindset, explaining common browser-based attacks in a simple and ethical manner. Through live demonstrations and real-world scenarios, participants will visually understand how attackers exploit browser behavior and why users are often the primary target rather than systems.
               </p>
               <p className="text-foreground">
-                Whether you're a beginner curious about cybersecurity or an experienced 
-                practitioner looking to sharpen your skills, From Click to Control offers hands-on learning, 
-                real-world scenarios, and networking opportunities with industry experts.
+                Built on the philosophy “Break to Build Better Security,” From Click to Control combines conceptual knowledge with hands-on learning in a safe lab environment. Participants will gain insights into ethical hacking tools, learn essential browser defense techniques, and leave with practical skills to better protect themselves in the online world.
               </p>
               <p className="text-muted-foreground">
                 <span className="text-primary">$</span> <span className="animate-pulse">_</span>
@@ -64,4 +55,3 @@ export const AboutSection = () => {
     </section>
   );
 };
-
