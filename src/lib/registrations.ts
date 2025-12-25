@@ -1,7 +1,5 @@
 // Local storage utility for registrations (client-side only - not secure for production)
 
-// Local storage utility for registrations (client-side only - not secure for production)
-
 export interface Registration {
   id: string;
   fullName: string;
@@ -15,7 +13,7 @@ export interface Registration {
   registeredAt: string;
 }
 
-const STORAGE_KEY = 'xploitix_registrations';
+const STORAGE_KEY = '_registrations';
 
 export const getRegistrations = (): Registration[] => {
   const data = localStorage.getItem(STORAGE_KEY);
@@ -45,7 +43,7 @@ export const clearAllRegistrations = (): void => {
 
 // Admin credentials (NOT SECURE - for demo only)
 const ADMIN_KEY = 'xploitix_admin';
-const DEMO_PASSWORD = 'xploitix2026';
+const DEMO_PASSWORD = 'xploitix_2026';
 
 export const isAdminLoggedIn = (): boolean => {
   return sessionStorage.getItem(ADMIN_KEY) === 'true';
@@ -62,4 +60,3 @@ export const adminLogin = (password: string): boolean => {
 export const adminLogout = (): void => {
   sessionStorage.removeItem(ADMIN_KEY);
 };
-
