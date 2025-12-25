@@ -16,6 +16,7 @@ interface FormData {
   phone: string;
   college: string;
   department: string;
+  year: string;
   isIEEEMember: string;
   ieeeNumber: string;
 }
@@ -28,6 +29,7 @@ export const RegistrationForm = () => {
     phone: '',
     college: '',
     department: '',
+    year: '',
     isIEEEMember: 'no',
     ieeeNumber: '',
   });
@@ -54,6 +56,7 @@ export const RegistrationForm = () => {
         phone: formData.phone,
         college: formData.college,
         department: formData.department,
+        year: formData.year,
         isIEEEMember: isIEEE,
         ieeeNumber: isIEEE ? formData.ieeeNumber : '',
         price,
@@ -77,6 +80,7 @@ export const RegistrationForm = () => {
           phone: '',
           college: '',
           department: '',
+          year: '',
           isIEEEMember: 'no',
           ieeeNumber: '',
         });
@@ -162,13 +166,27 @@ export const RegistrationForm = () => {
           {/* Department */}
           <div className="relative group">
             <label className="block text-sm text-muted-foreground mb-2 font-mono">
-              <span className="text-primary">&gt;</span> Department / Year
+              <span className="text-primary">&gt;</span> Department
             </label>
             <Input
               name="department"
               value={formData.department}
               onChange={handleInputChange}
-              placeholder="e.g., CSE / 3rd Year"
+              placeholder="e.g., CSE, ECE, EEE"
+              required
+            />
+          </div>
+
+          {/* Year */}
+          <div className="relative group">
+            <label className="block text-sm text-muted-foreground mb-2 font-mono">
+              <span className="text-primary">&gt;</span> Year
+            </label>
+            <Input
+              name="year"
+              value={formData.year}
+              onChange={handleInputChange}
+              placeholder="e.g., 1st, 2nd, 3rd, 4th"
               required
             />
           </div>
