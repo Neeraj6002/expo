@@ -69,10 +69,10 @@ export const HeroSection = () => {
           className="mb-6"
         >
           <h1 
-            className="text-6xl md:text-8xl lg:text-9xl font-display font-black text-primary neon-text-strong glitch flicker tracking-wider"
-            data-text="XPLOITIX"
+            className="text-4xl md:text-6xl lg:text-8xl font-display font-black text-primary neon-text-strong glitch flicker tracking-wider"
+            data-text="From Click to Control"
           >
-            XPLOITIX
+            From Click to Control
           </h1>
         </motion.div>
 
@@ -85,7 +85,7 @@ export const HeroSection = () => {
         >
           <p className="text-xl md:text-3xl font-display text-foreground tracking-wide">
             <TypewriterText 
-              text="Break to Build Better Security" 
+              text="Browser Hacking" 
               delay={800}
               speed={60}
             />
