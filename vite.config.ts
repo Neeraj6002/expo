@@ -28,6 +28,11 @@ export default defineConfig(({ mode }) => ({
     include: ['@supabase/supabase-js']
   },
 
+  // ✅ Force Supabase to be bundled (fixes Vercel build)
+  ssr: {
+    noExternal: ['@supabase/supabase-js']
+  },
+
   build: {
     // ✅ Silence chunk warning
     chunkSizeWarningLimit: 1500,
@@ -38,7 +43,6 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           react: ["react", "react-dom"],
           vendor: ["react-router-dom"],
-          supabase: ["@supabase/supabase-js"],
         },
       },
     },
