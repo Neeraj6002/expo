@@ -12,7 +12,7 @@ export const AboutSection = () => {
               <span>./about</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-4">
-              About <span className="text-primary neon-text">XPLOITIX</span>
+              About <span className="text-primary neon-text">From Click to Control</span>
             </h2>
           </div>
         </ScrollReveal>
@@ -24,7 +24,7 @@ export const AboutSection = () => {
               <div className="w-3 h-3 rounded-full bg-destructive" />
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
               <div className="w-3 h-3 rounded-full bg-primary" />
-              <span className="ml-4 text-muted-foreground font-mono text-sm">xploitix@terminal:~</span>
+              <span className="ml-4 text-muted-foreground font-mono text-sm">From Click to Control@terminal:~</span>
             </div>
 
             {/* Content */}
@@ -33,21 +33,21 @@ export const AboutSection = () => {
                 <span className="text-primary">$</span> cat about.txt
               </p>
               <p className="text-foreground">
-                <span className="text-primary font-bold">XPLOITIX</span> is an immersive cybersecurity 
+                <span className="text-primary font-bold">From Click to Control</span> is an immersive cybersecurity 
                 experience designed for aspiring ethical hackers and security enthusiasts. This 
                 event brings together students, professionals, and experts to explore the fascinating 
                 world of cybersecurity.
               </p>
               <p className="text-foreground">
                 In today's digital age, understanding security isn't just an advantage—it's a 
-                necessity. At XPLOITIX, you'll learn to think like a hacker while defending like 
+                necessity. At From Click to Control, you'll learn to think like a hacker while defending like 
                 a pro. Our motto, <span className="text-primary">"Break to Build Better Security"</span>, 
                 embodies the ethical hacking mindset: understanding vulnerabilities to create 
                 stronger defenses.
               </p>
               <p className="text-foreground">
                 Whether you're a beginner curious about cybersecurity or an experienced 
-                practitioner looking to sharpen your skills, XPLOITIX offers hands-on learning, 
+                practitioner looking to sharpen your skills, From Click to Control offers hands-on learning, 
                 real-world scenarios, and networking opportunities with industry experts.
               </p>
               <p className="text-muted-foreground">
@@ -64,3 +64,4 @@ export const AboutSection = () => {
     </section>
   );
 };
+
