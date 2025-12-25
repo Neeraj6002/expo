@@ -68,7 +68,7 @@ export const RegistrationForm = () => {
 
       toast({
         title: "Registration Successful!",
-        description: `You have been registered for XPLOITIX. Amount: ₹${price}`,
+        description: `You have been registered for From Click to Control. Amount: ₹${price}`,
       });
 
       // Reset after showing success
