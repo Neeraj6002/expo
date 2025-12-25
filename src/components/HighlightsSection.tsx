@@ -1,6 +1,6 @@
 import { ScrollReveal } from './ScrollReveal';
 import { HighlightCard } from './HighlightCard';
-import { Shield, Bug, Target, Lock, Code, Cpu } from 'lucide-react';
+import { Shield, Bug, Target, Lock, Code, Cpu, AlertCircle } from 'lucide-react';
 
 const highlights = [
   {
@@ -36,7 +36,7 @@ const highlights = [
     description: 'Learn basic defense techniques every user should know.',
   },
     {
-    icon: Bug,
+    icon: AlertCircle,
     title: 'Hands-on learning in a safe lab environment',
     description: 'Practice concepts without harming real systems.',
   },
@@ -76,5 +76,3 @@ export const HighlightsSection = () => {
     </section>
   );
 };
-
-
