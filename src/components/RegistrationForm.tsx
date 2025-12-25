@@ -315,13 +315,13 @@ export const RegistrationForm = () => {
               className="flex h-12 w-full rounded-md border-2 border-border bg-card px-4 py-2 text-base text-foreground font-mono ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:border-primary focus-visible:shadow-[0_0_15px_hsl(120_100%_50%/0.2)] md:text-sm appearance-none cursor-pointer"
             >
               <option value="">Select semester</option>
-              <option value="S1">S1</option>
-              <option value="S2">S2</option>
-              <option value="S3">S3</option>
+              <option value="S1">S1-s2</option>
+              
+              
               <option value="S4">S4</option>
-              <option value="S5">S5</option>
+              
               <option value="S6">S6</option>
-              <option value="S7">S7</option>
+              
               <option value="S8">S8</option>
             </select>
           </div>
@@ -339,7 +339,7 @@ export const RegistrationForm = () => {
             >
               <option value="no">Not a IEEE member (₹999)</option>
               <option value="ieee">IEEE member (₹899)</option>
-              <option value="ieee-cs">IEEE CS member (₹699)</option>
+              <option value="ieee-cs">IEEE CS member (₹799)</option>
             </select>
           </div>
 
@@ -400,7 +400,7 @@ export const RegistrationForm = () => {
           )}
           {formData.isIEEEMember === 'ieee-cs' && (
             <p className="text-xs text-green-500 font-mono mt-2">
-              ✓ IEEE CS Member Discount Applied (₹300 off)
+              ✓ IEEE CS Member Discount Applied (₹200 off)
             </p>
           )}
         </motion.div>
