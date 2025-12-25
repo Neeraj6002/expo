@@ -20,7 +20,7 @@ import {
   X,
   Download,
   Search,
-  ImageIcon,
+  Image,
   ZoomIn
 } from 'lucide-react';
 
@@ -430,6 +430,10 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const ieeeCount = registrations.filter(r => r.isIEEEMember).length;
   const nonIeeeCount = registrations.length - ieeeCount;
   const approvedCount = registrations.filter(r => r.approved).length;
+  const csCount = registrations.filter(r => 
+    r.department?.toLowerCase().includes('cs') || 
+    r.department?.toLowerCase().includes('computer science')
+  ).length;
 
   return (
     <motion.div
@@ -468,12 +472,13 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
         {[
           { label: 'Total Registrations', value: registrations.length, icon: Users },
           { label: 'Approved', value: approvedCount, icon: Check },
           { label: 'IEEE Members', value: ieeeCount, icon: Crown },
           { label: 'Non-IEEE', value: nonIeeeCount, icon: User },
+          { label: 'CS Department', value: csCount, icon: User },
           { label: 'Total Revenue', value: `₹${totalRevenue}`, icon: Users },
         ].map((stat) => (
           <div
@@ -593,7 +598,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                           </Button>
                         ) : (
                           <span className="text-xs font-mono text-muted-foreground flex items-center gap-1">
-                            <ImageIcon className="w-3 h-3" />
+                            <Image className="w-3 h-3" />
                             None
                           </span>
                         )}
