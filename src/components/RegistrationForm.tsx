@@ -375,12 +375,12 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
           {formData.isIEEEMember === 'ieee' && (
             <p className="text-xs text-green-500 font-mono mt-2">
-              ✓ IEEE Member Discount Applied (₹100 off)
+              ✓ IEEE Member Discount Applied (₹50 off)
             </p>
           )}
           {formData.isIEEEMember === 'ieee-cs' && (
             <p className="text-xs text-green-500 font-mono mt-2">
-              ✓ IEEE CS Member Discount Applied (₹200 off)
+              ✓ IEEE CS Member Discount Applied (₹100 off)
             </p>
           )}
         </motion.div>
