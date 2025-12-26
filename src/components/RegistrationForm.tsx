@@ -180,7 +180,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     toast({
       title: "Registration Successful!",
-      description: `You have been registered for FROM CLICK TO CTRL. Amount: ₹${price}`,
+      description: `You have been registered for CLICK TO CTRL. Amount: ₹${price}`,
     });
 
     // Reset after showing success
