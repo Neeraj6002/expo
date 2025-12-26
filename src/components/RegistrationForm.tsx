@@ -328,6 +328,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               <span className="text-primary">&gt;</span> IEEE Member?
             </label>
             <select
+            required
               name="isIEEEMember"
               value={formData.isIEEEMember}
               onChange={handleInputChange}
@@ -356,6 +357,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 onChange={handleInputChange}
                 placeholder="Enter your IEEE membership number"
                 required={isIEEEMember}
+                
               />
             </motion.div>
           )}
