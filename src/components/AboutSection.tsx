@@ -35,24 +35,24 @@ export const AboutSection = () => {
               
               <div className="space-y-3 text-foreground">
                 <p>
-                  <span className="text-primary font-bold">Hosted By:</span> IEEE SB MCET
+                  <span className="text-primary font-bold">Hosted By:</span> IEEE Student Branch of Mohandas Engineering College and Technology
                 </p>
                 <p>
                   <span className="text-primary font-bold">Date:</span> January 4, 2025
                 </p>
                 <p>
-                  <span className="text-primary font-bold">Location:</span> Mohandas College
+                  <span className="text-primary font-bold">Location:</span> Mohandas Engineering College Rd, Anad, Thiruvananthapuram 
                 </p>
                 <p>
                   <span className="text-primary font-bold">Contact:</span> <a href="https://wa.me/918075327095" target="_blank">
   <button>
-Anantha Padmanabhan P</button>
+Anantha Padmanabhan P: +91 8075327095</button>
 </a>
                 </p>
                 <p>
                   <span className="text-transparent font-bold">Contact:</span> <a href="https://wa.me/918075327095" target="_blank">
   <button>
-Vivekanand V S</button>
+Vivekanand V S: +91 8891047315</button>
 </a>
                 </p>
               </div>
