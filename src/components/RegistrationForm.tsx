@@ -134,11 +134,11 @@ export const RegistrationForm = () => {
 
     try {
       // Calculate price based on membership type
-      let price = 459; // Default non-member price
+      let price = 999; // Default non-member price
       if (formData.isIEEEMember === 'ieee') {
-        price = 499;
+        price = 899;
       } else if (formData.isIEEEMember === 'ieee-cs') {
-        price = 449;
+        price = 799;
       }
 
       const isIEEE = formData.isIEEEMember !== 'no';
@@ -206,9 +206,9 @@ export const RegistrationForm = () => {
   
   // Calculate price dynamically
   const getPrice = () => {
-    if (formData.isIEEEMember === 'ieee') return 499;
-    if (formData.isIEEEMember === 'ieee-cs') return 449;
-    return 549;
+    if (formData.isIEEEMember === 'ieee') return 899;
+    if (formData.isIEEEMember === 'ieee-cs') return 799;
+    return 999;
   };
 
   // Get QR code path
@@ -325,9 +325,9 @@ export const RegistrationForm = () => {
               onChange={handleInputChange}
               className="flex h-12 w-full rounded-md border-2 border-border bg-card px-4 py-2 text-base text-foreground font-mono ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:border-primary focus-visible:shadow-[0_0_15px_hsl(120_100%_50%/0.2)] md:text-sm appearance-none cursor-pointer"
             >
-              <option value="no">Not a IEEE member (₹549)</option>
-              <option value="ieee">IEEE member (₹499)</option>
-              <option value="ieee-cs">IEEE CS member (₹449)</option>
+              <option value="no">Not a IEEE member (₹999)</option>
+              <option value="ieee">IEEE member (₹899)</option>
+              <option value="ieee-cs">IEEE CS member (₹799)</option>
             </select>
           </div>
 
