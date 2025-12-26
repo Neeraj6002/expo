@@ -40,7 +40,8 @@ import {
   doc,
   query,
   orderBy,
-  updateDoc
+  updateDoc,
+  getDoc
 } from 'firebase/firestore';
 
 interface Registration {
@@ -268,19 +269,41 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const loadRegistrations = async () => {
+  const loadRegistrations = async (forceRefresh = false) => {
     try {
       setLoading(true);
+      
+      if (forceRefresh) {
+        console.log('Force refreshing registrations from Firestore...');
+      }
+      
       const q = query(collection(db, 'registrations'), orderBy('registeredAt', 'desc'));
       const querySnapshot = await getDocs(q);
       
       const regs: Registration[] = [];
-      querySnapshot.forEach((doc) => {
-        regs.push({ id: doc.id, ...doc.data() } as Registration);
+      querySnapshot.forEach((docSnapshot) => {
+        const data = docSnapshot.data();
+        console.log(`Loading document ID: ${docSnapshot.id}`, data);
+        regs.push({ 
+          id: docSnapshot.id, 
+          ...data,
+          // Ensure approved field exists (default to false if not present)
+          approved: data.approved ?? false
+        } as Registration);
       });
+      
+      console.log(`Successfully loaded ${regs.length} registrations from Firestore`);
+      console.log('Document IDs:', regs.map(r => r.id));
       
       setRegistrations(regs);
       setFilteredRegistrations(regs);
+      
+      if (forceRefresh) {
+        toast({
+          title: 'Data Refreshed',
+          description: `Loaded ${regs.length} registration(s) from database.`,
+        });
+      }
     } catch (error) {
       console.error('Error loading registrations:', error);
       toast({
@@ -294,7 +317,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   };
 
   useEffect(() => {
-    loadRegistrations();
+    loadRegistrations(true); // Force refresh on mount
   }, []);
 
   useEffect(() => {
@@ -320,42 +343,176 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   }, [searchQuery, registrations]);
 
   const handleApprovalToggle = async (id: string, currentStatus: boolean, name: string) => {
+    // Check if user is authenticated
+    if (!auth.currentUser) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in again to perform this action.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
-      await updateDoc(doc(db, 'registrations', id), {
-        approved: !currentStatus
+      console.log('=== APPROVAL TOGGLE START ===');
+      console.log('Document ID:', id);
+      console.log('Name:', name);
+      console.log('Current status:', currentStatus);
+      console.log('New status will be:', !currentStatus);
+      console.log('Auth user:', auth.currentUser?.email);
+      
+      const docRef = doc(db, 'registrations', id);
+      
+      // Verify document exists
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        console.error('Document does not exist!');
+        console.error('This document may have been deleted or the ID is incorrect.');
+        console.error('Attempting to refresh data from Firestore...');
+        
+        toast({
+          title: 'Stale Data Detected',
+          description: 'This registration was deleted or modified. Refreshing...',
+          variant: 'destructive',
+        });
+        
+        // Force refresh from Firestore
+        await loadRegistrations(true);
+        return;
+      }
+      
+      console.log('Document exists!');
+      console.log('Current document data:', docSnap.data());
+      
+      // Update the document with explicit value
+      const newApprovedStatus = !currentStatus;
+      console.log('Updating approved field to:', newApprovedStatus);
+      
+      await updateDoc(docRef, {
+        approved: newApprovedStatus
       });
-      await loadRegistrations();
+      
+      console.log('Firestore update successful!');
+      
+      // Update local state immediately for better UX
+      setRegistrations(prev => prev.map(reg => 
+        reg.id === id ? { ...reg, approved: newApprovedStatus } : reg
+      ));
+      setFilteredRegistrations(prev => prev.map(reg => 
+        reg.id === id ? { ...reg, approved: newApprovedStatus } : reg
+      ));
+      
+      console.log('Local state updated!');
+      console.log('=== APPROVAL TOGGLE SUCCESS ===');
+      
       toast({
-        title: !currentStatus ? 'Registration Approved' : 'Approval Revoked',
-        description: `${name}'s registration has been ${!currentStatus ? 'approved' : 'unapproved'}.`,
+        title: newApprovedStatus ? 'Registration Approved' : 'Approval Revoked',
+        description: `${name}'s registration has been ${newApprovedStatus ? 'approved' : 'unapproved'}.`,
       });
-    } catch (error) {
-      console.error('Error updating approval:', error);
+    } catch (error: any) {
+      console.error('=== APPROVAL TOGGLE ERROR ===');
+      console.error('Error object:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      let errorMessage = 'Failed to update approval status.';
+      
+      if (error.code === 'not-found') {
+        errorMessage = 'Registration not found. Refreshing list...';
+        await loadRegistrations();
+      } else if (error.code === 'permission-denied') {
+        errorMessage = 'Permission denied. Please check Firebase rules and authentication.';
+      } else if (error.code === 'unavailable') {
+        errorMessage = 'Firestore is temporarily unavailable. Please try again.';
+      } else {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
       toast({
-        title: 'Error',
-        description: 'Failed to update approval status.',
+        title: 'Update Failed',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete ${name}'s registration?`)) {
+    if (!window.confirm(`Are you sure you want to delete ${name}'s registration? This action cannot be undone.`)) {
+      return;
+    }
+
+    // Check if user is authenticated
+    if (!auth.currentUser) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in again to perform this action.',
+        variant: 'destructive',
+      });
       return;
     }
 
     try {
-      await deleteDoc(doc(db, 'registrations', id));
-      await loadRegistrations();
+      console.log('=== DELETE START ===');
+      console.log('Document ID:', id);
+      console.log('Name:', name);
+      console.log('Auth user:', auth.currentUser?.email);
+      
+      const docRef = doc(db, 'registrations', id);
+      
+      // Check if document exists first
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        console.error('Document does not exist!');
+        toast({
+          title: 'Document Not Found',
+          description: 'This registration no longer exists. Refreshing list...',
+          variant: 'destructive',
+        });
+        await loadRegistrations();
+        return;
+      }
+      
+      console.log('Document exists, proceeding with delete...');
+      
+      await deleteDoc(docRef);
+      
+      console.log('Firestore delete successful!');
+      
+      // Update local state immediately
+      setRegistrations(prev => prev.filter(reg => reg.id !== id));
+      setFilteredRegistrations(prev => prev.filter(reg => reg.id !== id));
+      
+      console.log('Local state updated!');
+      console.log('=== DELETE SUCCESS ===');
+      
       toast({
         title: 'Registration Deleted',
-        description: `Removed ${name} from registrations.`,
+        description: `Successfully removed ${name} from registrations.`,
       });
-    } catch (error) {
-      console.error('Error deleting registration:', error);
+    } catch (error: any) {
+      console.error('=== DELETE ERROR ===');
+      console.error('Error object:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      let errorMessage = 'Failed to delete registration.';
+      
+      if (error.code === 'not-found') {
+        errorMessage = 'Registration not found. Refreshing list...';
+        await loadRegistrations();
+      } else if (error.code === 'permission-denied') {
+        errorMessage = 'Permission denied. Please check Firebase rules and authentication.';
+      } else {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
       toast({
-        title: 'Error',
-        description: 'Failed to delete registration.',
+        title: 'Delete Failed',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -428,12 +585,15 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
 
   const totalRevenue = registrations.reduce((sum, r) => sum + r.price, 0);
   const ieeeCount = registrations.filter(r => r.isIEEEMember).length;
+  const ieeeCSCount = registrations.filter(r => 
+    r.isIEEEMember && (
+      r.college.toLowerCase().includes('computer') ||
+      r.department?.toLowerCase().includes('computer') ||
+      r.department?.toLowerCase().includes('cs')
+    )
+  ).length;
   const nonIeeeCount = registrations.length - ieeeCount;
   const approvedCount = registrations.filter(r => r.approved).length;
-  const csCount = registrations.filter(r => 
-    r.department?.toLowerCase().includes('cs') || 
-    r.department?.toLowerCase().includes('computer science')
-  ).length;
 
   return (
     <motion.div
@@ -460,7 +620,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Site
           </Button>
-          <Button variant="cyber-outline" size="sm" onClick={loadRegistrations} disabled={loading}>
+          <Button variant="cyber-outline" size="sm" onClick={() => loadRegistrations(true)} disabled={loading}>
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
@@ -472,13 +632,13 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {[
           { label: 'Total Registrations', value: registrations.length, icon: Users },
           { label: 'Approved', value: approvedCount, icon: Check },
           { label: 'IEEE Members', value: ieeeCount, icon: Crown },
+          { label: 'IEEE CS Members', value: ieeeCSCount, icon: Crown },
           { label: 'Non-IEEE', value: nonIeeeCount, icon: User },
-          { label: 'CS Department', value: csCount, icon: User },
           { label: 'Total Revenue', value: `₹${totalRevenue}`, icon: Users },
         ].map((stat) => (
           <div
