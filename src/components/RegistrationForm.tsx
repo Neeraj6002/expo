@@ -6,6 +6,8 @@ import { ScrollReveal } from './ScrollReveal';
 import { Check, Loader2, Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+
+
 // Firebase imports
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -213,9 +215,9 @@ export const RegistrationForm = () => {
 
   // Get QR code path
   const getQRCode = () => {
-    if (formData.isIEEEMember === 'ieee-cs') return './assets/cs.jpeg';
-    if (formData.isIEEEMember === 'ieee') return './assets/ieee.jpeg';
-    return './assets/non ieee.jpeg';
+    if (formData.isIEEEMember === 'ieee-cs') return '/src/assets/cs.jpeg';
+    if (formData.isIEEEMember === 'ieee') return '/src/assets/ieee.jpeg';
+    return '/src/assets/non ieee.jpeg';
   };
 
   return (
