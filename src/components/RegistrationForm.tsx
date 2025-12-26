@@ -46,7 +46,10 @@ export const RegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -228,7 +231,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   return (
     <ScrollReveal>
-      <div className="max-w-2xl mx-auto space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-2xl mx-auto space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
           <div className="relative group">
@@ -241,6 +246,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               onChange={handleInputChange}
               placeholder="Enter your name"
               required
+              
             />
           </div>
 
@@ -302,10 +308,10 @@ const handleSubmit = async (e: React.FormEvent) => {
             />
           </div>
 
-          {/* Year - Changed to Dropdown */}
+{/* Year - Changed to Dropdown */}
           <div className="relative group">
             <label className="block text-sm text-muted-foreground mb-2 font-mono">
-              <span className="text-primary">&gt;</span> Semester
+              <span className="text-primary">&gt;</span> Semester *
             </label>
             <select
               name="year"
@@ -325,10 +331,10 @@ const handleSubmit = async (e: React.FormEvent) => {
           {/* IEEE Member */}
           <div className="relative group">
             <label className="block text-sm text-muted-foreground mb-2 font-mono">
-              <span className="text-primary">&gt;</span> IEEE Member?
+              <span className="text-primary">&gt;</span> IEEE Member? *
             </label>
             <select
-            required
+              required
               name="isIEEEMember"
               value={formData.isIEEEMember}
               onChange={handleInputChange}
@@ -498,48 +504,34 @@ const handleSubmit = async (e: React.FormEvent) => {
           )}
         </div>
 
-        {/* Submit Button */}
-        <div className="pt-4">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button
-              type="button"
-              variant="cyber"
-              size="xl"
-              className="w-full"
-              disabled={isSubmitting || isSuccess}
-              onClick={handleSubmit}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
-                </>
-              ) : isSuccess ? (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="flex items-center gap-2"
-                >
-                  <Check className="h-5 w-5" />
-                  Registered!
-                </motion.div>
-              ) : (
-                'Register Now'
-              )}
-            </Button>
-          </motion.div>
-        </div>
+ <Button
+          type="submit"
+          variant="cyber"
+          size="xl"
+          className="w-full"
+          disabled={isSubmitting || isSuccess}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Processing...
+            </>
+          ) : isSuccess ? (
+            <>
+              <Check className="mr-2 h-5 w-5" />
+              Registered!
+            </>
+          ) : (
+            'Register Now'
+          )}
+        </Button>
 
-        {/* Terminal style message */}
         <p className="text-center text-xs text-muted-foreground font-mono">
           <span className="text-primary">[</span>
           Secure connection established
           <span className="text-primary">]</span>
         </p>
-      </div>
+      </form>
     </ScrollReveal>
   );
 };
