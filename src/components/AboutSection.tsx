@@ -41,7 +41,7 @@ export const AboutSection = () => {
                   <span className="text-primary font-bold">Date:</span> January 4, 2026
                 </p>
                 <p>
-                  <span className="text-primary font-bold">Location:</span> Mohandas Engineering College and Technology, Anad, Thiruvananthapuram 
+                  <span className="text-primary font-bold">Location:</span> Mohandas Engineering College and Technology
                 </p>
                 <p>
                   <span className="text-primary font-bold">Contact:</span> <a href="https://wa.me/918075327095" target="_blank">
