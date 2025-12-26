@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 
 // Firebase imports
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // Supabase imports
 import { supabase } from "@/lib/supabase";
@@ -85,12 +85,12 @@ export const RegistrationForm = () => {
     setPreviewUrl(null);
   };
 
-  const uploadImageToSupabase = async (file: File, registrationId: string): Promise<string> => {
+  const uploadImageToSupabase = async (file: File, uniqueId: string): Promise<string> => {
     try {
       // Create a unique file name
       const timestamp = Date.now();
       const fileExt = file.name.split('.').pop();
-      const fileName = `${registrationId}_${timestamp}.${fileExt}`;
+      const fileName = `${uniqueId}_${timestamp}.${fileExt}`;
       const filePath = `payment-screenshots/${fileName}`;
 
       // Upload file to Supabase Storage
@@ -143,8 +143,14 @@ export const RegistrationForm = () => {
 
       const isIEEE = formData.isIEEEMember !== 'no';
 
-      // First, create the registration document to get an ID
-      const docRef = await addDoc(collection(db, 'registrations'), {
+      // Generate a unique temporary ID for image upload
+      const uniqueId = `reg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Upload image to Supabase Storage FIRST
+      const imageUrl = await uploadImageToSupabase(paymentScreenshot, uniqueId);
+
+      // Create the registration document with ALL data including image URL
+      await addDoc(collection(db, 'registrations'), {
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -159,14 +165,6 @@ export const RegistrationForm = () => {
         createdAt: serverTimestamp(),
         paymentStatus: 'pending',
         approved: false,
-        paymentScreenshotUrl: '',
-      });
-
-      // Upload image to Supabase Storage using the Firestore document ID
-      const imageUrl = await uploadImageToSupabase(paymentScreenshot, docRef.id);
-
-      // Update the Firestore document with the Supabase image URL
-      await updateDoc(doc(db, 'registrations', docRef.id), {
         paymentScreenshotUrl: imageUrl,
       });
 
@@ -303,11 +301,8 @@ export const RegistrationForm = () => {
             >
               <option value="">Select semester</option>
               <option value="S1">S1-S2</option>
-              
               <option value="S4">S4</option>
-             
               <option value="S6">S6</option>
-             
               <option value="S8">S8</option>
             </select>
           </div>
@@ -370,7 +365,7 @@ export const RegistrationForm = () => {
           )}
           {formData.isIEEEMember === 'ieee-cs' && (
             <p className="text-xs text-green-500 font-mono mt-2">
-              ✓ IEEE CS Member Discount Applied (₹300 off)
+              ✓ IEEE CS Member Discount Applied (₹200 off)
             </p>
           )}
         </motion.div>
