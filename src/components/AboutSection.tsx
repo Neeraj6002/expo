@@ -38,7 +38,7 @@ export const AboutSection = () => {
                   <span className="text-primary font-bold">Hosted By:</span> IEEE Student Branch of Mohandas Engineering College and Technology
                 </p>
                 <p>
-                  <span className="text-primary font-bold">Date:</span> January 4, 2025
+                  <span className="text-primary font-bold">Date:</span> January 4, 2026
                 </p>
                 <p>
                   <span className="text-primary font-bold">Location:</span> Mohandas Engineering College Rd, Anad, Thiruvananthapuram 
