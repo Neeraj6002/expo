@@ -1,26 +1,27 @@
 import { motion } from 'framer-motion';
 import { Check, Crown, Heart, Users } from 'lucide-react';
+
 export const PricingCards = () => {
   const pricingData = [
     {
       title: 'IEEE CS Members',
       price: 449,
       icon: Heart,
-      features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments', 'IEEE CS Member Discount'],
+      features: ['Full Event Access', 'Workshop Materials', 'Certificates ', 'Refreshments', 'IEEE CS Member Discount'],
       highlighted: true,
     },
     {
       title: 'IEEE Members',
       price: 499,
       icon: Crown,
-      features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments', 'IEEE Member Discount'],
+      features: ['Full Event Access', 'Workshop Materials', 'Certificates', 'Refreshments', 'IEEE Member Discount'],
       highlighted: true,
     },
     {
       title: 'Non-IEEE',
       price: 549,
       icon: Users,
-      features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments'],
+      features: ['Full Event Access', 'Workshop Materials', 'Certificates', 'Refreshments'],
       highlighted: false,
     },
   ];
