@@ -122,90 +122,88 @@ export const RegistrationForm = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validate payment screenshot
-    if (!paymentScreenshot) {
-      toast({
-        title: "Payment Screenshot Required",
-        description: "Please upload your payment screenshot",
-        variant: "destructive",
-      });
-      return;
+  // Validate payment screenshot
+  if (!paymentScreenshot) {
+    toast({
+      title: "Payment Screenshot Required",
+      description: "Please upload your payment screenshot",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  // Redirect to WhatsApp immediately
+  window.open('https://chat.whatsapp.com/DeDwQEhTWlg5rlgI1Sya8I', '_blank');
+
+  setIsSubmitting(true);
+
+  try {
+    // Calculate price based on membership type
+    let price = 549;
+    if (formData.isIEEEMember === 'ieee') {
+      price = 499;
+    } else if (formData.isIEEEMember === 'ieee-cs') {
+      price = 449;
     }
 
-    setIsSubmitting(true);
+    const isIEEE = formData.isIEEEMember !== 'no';
+    const uniqueId = `reg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const imageUrl = await uploadImageToSupabase(paymentScreenshot, uniqueId);
 
-    try {
-      // Calculate price based on membership type
-      let price = 549; // Default non-member price
-      if (formData.isIEEEMember === 'ieee') {
-        price = 499;
-      } else if (formData.isIEEEMember === 'ieee-cs') {
-        price = 449;
-      }
+    await addDoc(collection(db, 'registrations'), {
+      fullName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      college: formData.college,
+      department: formData.department,
+      year: formData.year,
+      isIEEEMember: isIEEE,
+      membershipType: formData.isIEEEMember,
+      ieeeNumber: isIEEE ? formData.ieeeNumber : '',
+      price,
+      registeredAt: new Date().toISOString(),
+      createdAt: serverTimestamp(),
+      paymentStatus: 'pending',
+      approved: false,
+      paymentScreenshotUrl: imageUrl,
+    });
 
-      const isIEEE = formData.isIEEEMember !== 'no';
+    setIsSuccess(true);
 
-      // Generate a unique temporary ID for image upload
-      const uniqueId = `reg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    toast({
+      title: "Registration Successful!",
+      description: `You have been registered for FROM CLICK TO CTRL. Amount: ₹${price}`,
+    });
 
-      // Upload image to Supabase Storage FIRST
-      const imageUrl = await uploadImageToSupabase(paymentScreenshot, uniqueId);
-
-      // Create the registration document with ALL data including image URL
-      await addDoc(collection(db, 'registrations'), {
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        college: formData.college,
-        department: formData.department,
-        year: formData.year,
-        isIEEEMember: isIEEE,
-        membershipType: formData.isIEEEMember,
-        ieeeNumber: isIEEE ? formData.ieeeNumber : '',
-        price,
-        registeredAt: new Date().toISOString(),
-        createdAt: serverTimestamp(),
-        paymentStatus: 'pending',
-        approved: false,
-        paymentScreenshotUrl: imageUrl,
+    // Reset after showing success
+    setTimeout(() => {
+      setIsSuccess(false);
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        college: '',
+        department: '',
+        year: '',
+        isIEEEMember: 'no',
+        ieeeNumber: '',
       });
-
-      setIsSuccess(true);
-
-      toast({
-        title: "Registration Successful!",
-        description: `You have been registered for FROM CLICK TO CTRL. Amount: ₹${price}`,
-      });
-
-      // Reset after showing success
-      setTimeout(() => {
-        setIsSuccess(false);
-        setFormData({
-          fullName: '',
-          email: '',
-          phone: '',
-          college: '',
-          department: '',
-          year: '',
-          isIEEEMember: 'no',
-          ieeeNumber: '',
-        });
-        removeFile();
-      }, 3000);
-    } catch (error) {
-      console.error('Error submitting registration:', error);
-      toast({
-        title: "Registration Failed",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      removeFile();
+    }, 3000);
+  } catch (error) {
+    console.error('Error submitting registration:', error);
+    toast({
+      title: "Registration Failed",
+      description: "Something went wrong. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const isIEEEMember = formData.isIEEEMember !== 'no';
   
