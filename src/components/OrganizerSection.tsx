@@ -42,7 +42,7 @@ export const OrganizerSection = () => {
               <p className="text-muted-foreground font-mono leading-relaxed max-w-2xl">
                 The IEEE Student Branch at MCET is committed to fostering technological 
                 innovation and professional development among students. Through workshops, 
-                seminars, and events like From Click to Control, we aim to bridge the gap between 
+                seminars, and events like From Click to Ctrl, we aim to bridge the gap between 
                 academic learning and industry requirements, preparing students for 
                 successful careers in technology.
               </p>
@@ -59,4 +59,3 @@ export const OrganizerSection = () => {
     </section>
   );
 };
-
