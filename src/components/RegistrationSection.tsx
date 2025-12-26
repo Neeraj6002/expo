@@ -17,7 +17,7 @@ export const RegistrationSection = () => {
               <span>./register</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-4">
-              Join <span className="text-primary neon-text">FROM CLICK TO CTRL</span>
+              Join <span className="text-primary neon-text">CLICK TO CTRL</span>
             </h2>
             <p className="text-muted-foreground font-mono max-w-xl mx-auto">
               Secure your spot at the most anticipated cybersecurity event. Limited seats available.
