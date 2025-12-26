@@ -5,21 +5,21 @@ export const PricingCards = () => {
   const pricingData = [
     {
       title: 'IEEE CS Members',
-      price: 799,
+      price: 449,
       icon: Heart,
       features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments', 'IEEE Member Discount'],
       highlighted: true,
     },
     {
       title: 'IEEE Members',
-      price: 899,
+      price: 499,
       icon: Crown,
       features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments', 'IEEE CS Member Discount'],
       highlighted: true,
     },
     {
       title: 'Non-IEEE',
-      price: 999,
+      price: 549,
       icon: Users,
       features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments'],
       highlighted: false,
