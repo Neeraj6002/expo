@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 
 // Firebase imports
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 
 // Supabase imports
 import { supabase } from "@/lib/supabase";
@@ -138,7 +138,7 @@ export const RegistrationForm = () => {
       if (formData.isIEEEMember === 'ieee') {
         price = 899;
       } else if (formData.isIEEEMember === 'ieee-cs') {
-        price = 699;
+        price = 799;
       }
 
       const isIEEE = formData.isIEEEMember !== 'no';
@@ -158,28 +158,15 @@ export const RegistrationForm = () => {
         registeredAt: new Date().toISOString(),
         createdAt: serverTimestamp(),
         paymentStatus: 'pending',
+        approved: false,
         paymentScreenshotUrl: '',
       });
 
-      // Upload image to Supabase Storage
+      // Upload image to Supabase Storage using the Firestore document ID
       const imageUrl = await uploadImageToSupabase(paymentScreenshot, docRef.id);
 
-      // Update Firestore document with the Supabase image URL
-      await addDoc(collection(db, 'registrations'), {
-        id: docRef.id,
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        college: formData.college,
-        department: formData.department,
-        year: formData.year,
-        isIEEEMember: isIEEE,
-        membershipType: formData.isIEEEMember,
-        ieeeNumber: isIEEE ? formData.ieeeNumber : '',
-        price,
-        registeredAt: new Date().toISOString(),
-        createdAt: serverTimestamp(),
-        paymentStatus: 'pending',
+      // Update the Firestore document with the Supabase image URL
+      await updateDoc(doc(db, 'registrations', docRef.id), {
         paymentScreenshotUrl: imageUrl,
       });
 
@@ -222,7 +209,7 @@ export const RegistrationForm = () => {
   // Calculate price dynamically
   const getPrice = () => {
     if (formData.isIEEEMember === 'ieee') return 899;
-    if (formData.isIEEEMember === 'ieee-cs') return 699;
+    if (formData.isIEEEMember === 'ieee-cs') return 799;
     return 999;
   };
 
@@ -315,13 +302,12 @@ export const RegistrationForm = () => {
               className="flex h-12 w-full rounded-md border-2 border-border bg-card px-4 py-2 text-base text-foreground font-mono ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:border-primary focus-visible:shadow-[0_0_15px_hsl(120_100%_50%/0.2)] md:text-sm appearance-none cursor-pointer"
             >
               <option value="">Select semester</option>
-              <option value="S1">S1-s2</option>
-              
+              <option value="S1">S1-S2</option>
               
               <option value="S4">S4</option>
-              
+             
               <option value="S6">S6</option>
-              
+             
               <option value="S8">S8</option>
             </select>
           </div>
@@ -365,25 +351,9 @@ export const RegistrationForm = () => {
           )}
         </div>
 
-        {/* Payment Screenshot Upload */}
-        <div className="relative group">
-          <label className="block text-sm text-muted-foreground mb-2 font-mono">
-            <span className="text-primary">&gt;</span> Payment Screenshot *
-          </label>
-          
-          {!previewUrl ? (
-            <div className="relative">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-                id="payment-screenshot"
-              />
-
-                     {/* Price Display */}
+        {/* Price Display */}
         <motion.div
-          className="bg-card/50 border-2 border-primary/20 rounded-lg p-4 mb-4 backdrop-blur-sm"
+          className="bg-card/50 border-2 border-primary/20 rounded-lg p-4 backdrop-blur-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -400,11 +370,26 @@ export const RegistrationForm = () => {
           )}
           {formData.isIEEEMember === 'ieee-cs' && (
             <p className="text-xs text-green-500 font-mono mt-2">
-              ✓ IEEE CS Member Discount Applied (₹200 off)
+              ✓ IEEE CS Member Discount Applied (₹300 off)
             </p>
           )}
         </motion.div>
 
+        {/* Payment Screenshot Upload */}
+        <div className="relative group">
+          <label className="block text-sm text-muted-foreground mb-2 font-mono">
+            <span className="text-primary">&gt;</span> Payment Screenshot *
+          </label>
+          
+          {!previewUrl ? (
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="payment-screenshot"
+              />
 
               <label
                 htmlFor="payment-screenshot"
@@ -464,8 +449,6 @@ export const RegistrationForm = () => {
             </motion.div>
           )}
         </div>
-
- 
 
         {/* Submit Button */}
         <div className="pt-4">
