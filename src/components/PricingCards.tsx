@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { Check, Crown, Heart, Users } from 'lucide-react';
-
 export const PricingCards = () => {
   const pricingData = [
     {
