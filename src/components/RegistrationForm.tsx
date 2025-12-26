@@ -149,7 +149,11 @@ const handleSubmit = async (e: React.FormEvent) => {
       price = 449;
     }
 
-    const isIEEE = formData.isIEEEMember !== 'no';
+    // Determine membership flags
+    const membershipType = formData.isIEEEMember; // 'ieee', 'ieee-cs', or 'no'
+    const isIEEEMember = membershipType === 'ieee' || membershipType === 'ieee-cs';
+    const isIEEECSMember = membershipType === 'ieee-cs';
+
     const uniqueId = `reg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const imageUrl = await uploadImageToSupabase(paymentScreenshot, uniqueId);
 
@@ -160,9 +164,10 @@ const handleSubmit = async (e: React.FormEvent) => {
       college: formData.college,
       department: formData.department,
       year: formData.year,
-      isIEEEMember: isIEEE,
-      membershipType: formData.isIEEEMember,
-      ieeeNumber: isIEEE ? formData.ieeeNumber : '',
+      isIEEEMember: isIEEEMember,
+      isIEEECSMember: isIEEECSMember,
+      membershipType: membershipType,
+      ieeeNumber: isIEEEMember ? formData.ieeeNumber : '',
       price,
       registeredAt: new Date().toISOString(),
       createdAt: serverTimestamp(),
