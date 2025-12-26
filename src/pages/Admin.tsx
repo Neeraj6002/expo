@@ -21,10 +21,10 @@ import {
   Download,
   Search,
   Image,
-  ZoomIn
+  ZoomIn,
+  ShieldAlert
 } from 'lucide-react';
 
-// Firebase imports
 import { auth, db } from '@/lib/firebase';
 import { 
   signInWithEmailAndPassword, 
@@ -43,6 +43,23 @@ import {
   updateDoc,
   getDoc
 } from 'firebase/firestore';
+
+// ============================================
+// WHITELIST CONFIGURATION
+// Add authorized admin email addresses here
+// ============================================
+const ADMIN_WHITELIST = [
+  'neerajj6002@gmail.com',
+  'vivekexists@gmail.com',
+  'another.admin@domain.com',
+  // Add more authorized emails here
+];
+
+// Helper function to check if email is whitelisted
+const isEmailWhitelisted = (email: string | null | undefined): boolean => {
+  if (!email) return false;
+  return ADMIN_WHITELIST.includes(email.toLowerCase().trim());
+};
 
 interface Registration {
   id: string;
@@ -112,8 +129,33 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
     setLoading(true);
     setError('');
 
+    // Check whitelist before attempting login
+    if (!isEmailWhitelisted(email)) {
+      setError('Access denied: Email not authorized');
+      setLoading(false);
+      toast({
+        title: 'Access Denied',
+        description: 'Your email is not authorized to access this panel.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Double-check whitelist after successful authentication
+      if (!isEmailWhitelisted(userCredential.user.email)) {
+        await signOut(auth);
+        setError('Access denied: Email not authorized');
+        toast({
+          title: 'Access Denied',
+          description: 'Your email is not authorized to access this panel.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       toast({
         title: 'Access Granted',
         description: 'Welcome to the admin panel.',
@@ -125,6 +167,11 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
         ? 'Invalid email or password' 
         : err.message || 'Invalid credentials';
       setError(errorMessage);
+      toast({
+        title: 'Login Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -136,7 +183,20 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
 
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      
+      // Check if the Google account email is whitelisted
+      if (!isEmailWhitelisted(result.user.email)) {
+        await signOut(auth);
+        setError('Access denied: Email not authorized');
+        toast({
+          title: 'Access Denied',
+          description: 'Your Google account is not authorized to access this panel.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       toast({
         title: 'Access Granted',
         description: 'Welcome to the admin panel.',
@@ -148,6 +208,11 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
         ? 'Sign-in cancelled'
         : err.message || 'Failed to sign in with Google';
       setError(errorMessage);
+      toast({
+        title: 'Sign-in Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setGoogleLoading(false);
     }
@@ -168,10 +233,10 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
         <div className="text-center mb-8">
           <Lock className="w-12 h-12 text-primary mx-auto mb-4" />
           <h1 className="text-2xl font-display font-bold text-foreground">Admin Access</h1>
-          <p className="text-sm text-muted-foreground font-mono mt-2">Enter credentials to continue</p>
+          <p className="text-sm text-muted-foreground font-mono mt-2">Restricted Access - Authorized Personnel Only</p>
         </div>
 
-        <div onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Input
               type="email"
@@ -201,19 +266,20 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
           </div>
 
           {error && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-destructive text-sm font-mono"
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md"
             >
-              [ERROR] {error}
-            </motion.p>
+              <ShieldAlert className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+              <p className="text-destructive text-sm font-mono">{error}</p>
+            </motion.div>
           )}
 
-          <Button type="button" onClick={handleSubmit} variant="cyber" className="w-full" disabled={loading || googleLoading}>
-            {loading ? 'Authenticating...' : 'Access Panel'}
+          <Button type="submit" variant="cyber" className="w-full" disabled={loading || googleLoading}>
+            {loading ? 'Verifying Access...' : 'Access Panel'}
           </Button>
-        </div>
+        </form>
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
@@ -253,8 +319,14 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
               />
             </svg>
           )}
-          {googleLoading ? 'Signing in...' : 'Sign in with Google'}
+          {googleLoading ? 'Verifying...' : 'Sign in with Google'}
         </Button>
+
+        <div className="mt-6 p-3 bg-muted/50 border border-border rounded-md">
+          <p className="text-xs text-muted-foreground font-mono text-center">
+            🔒 This panel is restricted to authorized administrators only
+          </p>
+        </div>
       </div>
     </motion.div>
   );
@@ -266,8 +338,16 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Set current user email
+    if (auth.currentUser?.email) {
+      setCurrentUserEmail(auth.currentUser.email);
+    }
+  }, []);
 
   const loadRegistrations = async (forceRefresh = false) => {
     try {
@@ -283,17 +363,14 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       const regs: Registration[] = [];
       querySnapshot.forEach((docSnapshot) => {
         const data = docSnapshot.data();
-        console.log(`Loading document ID: ${docSnapshot.id}`, data);
         regs.push({ 
           id: docSnapshot.id, 
           ...data,
-          // Ensure approved field exists (default to false if not present)
           approved: data.approved ?? false
         } as Registration);
       });
       
       console.log(`Successfully loaded ${regs.length} registrations from Firestore`);
-      console.log('Document IDs:', regs.map(r => r.id));
       
       setRegistrations(regs);
       setFilteredRegistrations(regs);
@@ -317,7 +394,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   };
 
   useEffect(() => {
-    loadRegistrations(true); // Force refresh on mount
+    loadRegistrations(true);
   }, []);
 
   useEffect(() => {
@@ -343,7 +420,6 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   }, [searchQuery, registrations]);
 
   const handleApprovalToggle = async (id: string, currentStatus: boolean, name: string) => {
-    // Check if user is authenticated
     if (!auth.currentUser) {
       toast({
         title: 'Authentication Required',
@@ -353,49 +429,37 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       return;
     }
 
+    // Verify user is still whitelisted
+    if (!isEmailWhitelisted(auth.currentUser.email)) {
+      toast({
+        title: 'Access Denied',
+        description: 'You are not authorized to perform this action.',
+        variant: 'destructive',
+      });
+      await signOut(auth);
+      onLogout();
+      return;
+    }
+
     try {
-      console.log('=== APPROVAL TOGGLE START ===');
-      console.log('Document ID:', id);
-      console.log('Name:', name);
-      console.log('Current status:', currentStatus);
-      console.log('New status will be:', !currentStatus);
-      console.log('Auth user:', auth.currentUser?.email);
-      
       const docRef = doc(db, 'registrations', id);
-      
-      // Verify document exists
       const docSnap = await getDoc(docRef);
       
       if (!docSnap.exists()) {
-        console.error('Document does not exist!');
-        console.error('This document may have been deleted or the ID is incorrect.');
-        console.error('Attempting to refresh data from Firestore...');
-        
         toast({
           title: 'Stale Data Detected',
           description: 'This registration was deleted or modified. Refreshing...',
           variant: 'destructive',
         });
-        
-        // Force refresh from Firestore
         await loadRegistrations(true);
         return;
       }
       
-      console.log('Document exists!');
-      console.log('Current document data:', docSnap.data());
-      
-      // Update the document with explicit value
       const newApprovedStatus = !currentStatus;
-      console.log('Updating approved field to:', newApprovedStatus);
-      
       await updateDoc(docRef, {
         approved: newApprovedStatus
       });
       
-      console.log('Firestore update successful!');
-      
-      // Update local state immediately for better UX
       setRegistrations(prev => prev.map(reg => 
         reg.id === id ? { ...reg, approved: newApprovedStatus } : reg
       ));
@@ -403,19 +467,12 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
         reg.id === id ? { ...reg, approved: newApprovedStatus } : reg
       ));
       
-      console.log('Local state updated!');
-      console.log('=== APPROVAL TOGGLE SUCCESS ===');
-      
       toast({
         title: newApprovedStatus ? 'Registration Approved' : 'Approval Revoked',
         description: `${name}'s registration has been ${newApprovedStatus ? 'approved' : 'unapproved'}.`,
       });
     } catch (error: any) {
-      console.error('=== APPROVAL TOGGLE ERROR ===');
-      console.error('Error object:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
+      console.error('Approval toggle error:', error);
       
       let errorMessage = 'Failed to update approval status.';
       
@@ -424,10 +481,6 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
         await loadRegistrations();
       } else if (error.code === 'permission-denied') {
         errorMessage = 'Permission denied. Please check Firebase rules and authentication.';
-      } else if (error.code === 'unavailable') {
-        errorMessage = 'Firestore is temporarily unavailable. Please try again.';
-      } else {
-        errorMessage = `Error: ${error.message}`;
       }
       
       toast({
@@ -443,7 +496,6 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       return;
     }
 
-    // Check if user is authenticated
     if (!auth.currentUser) {
       toast({
         title: 'Authentication Required',
@@ -453,19 +505,23 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       return;
     }
 
+    // Verify user is still whitelisted
+    if (!isEmailWhitelisted(auth.currentUser.email)) {
+      toast({
+        title: 'Access Denied',
+        description: 'You are not authorized to perform this action.',
+        variant: 'destructive',
+      });
+      await signOut(auth);
+      onLogout();
+      return;
+    }
+
     try {
-      console.log('=== DELETE START ===');
-      console.log('Document ID:', id);
-      console.log('Name:', name);
-      console.log('Auth user:', auth.currentUser?.email);
-      
       const docRef = doc(db, 'registrations', id);
-      
-      // Check if document exists first
       const docSnap = await getDoc(docRef);
       
       if (!docSnap.exists()) {
-        console.error('Document does not exist!');
         toast({
           title: 'Document Not Found',
           description: 'This registration no longer exists. Refreshing list...',
@@ -475,29 +531,17 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
         return;
       }
       
-      console.log('Document exists, proceeding with delete...');
-      
       await deleteDoc(docRef);
       
-      console.log('Firestore delete successful!');
-      
-      // Update local state immediately
       setRegistrations(prev => prev.filter(reg => reg.id !== id));
       setFilteredRegistrations(prev => prev.filter(reg => reg.id !== id));
-      
-      console.log('Local state updated!');
-      console.log('=== DELETE SUCCESS ===');
       
       toast({
         title: 'Registration Deleted',
         description: `Successfully removed ${name} from registrations.`,
       });
     } catch (error: any) {
-      console.error('=== DELETE ERROR ===');
-      console.error('Error object:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
+      console.error('Delete error:', error);
       
       let errorMessage = 'Failed to delete registration.';
       
@@ -506,8 +550,6 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
         await loadRegistrations();
       } else if (error.code === 'permission-denied') {
         errorMessage = 'Permission denied. Please check Firebase rules and authentication.';
-      } else {
-        errorMessage = `Error: ${error.message}`;
       }
       
       toast({
@@ -613,7 +655,9 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
           <h1 className="text-3xl font-display font-bold text-foreground">
             <span className="text-primary">FROM CLICK TO CTRL</span> Admin
           </h1>
-          <p className="text-sm text-muted-foreground font-mono mt-1">Registration Dashboard</p>
+          <p className="text-sm text-muted-foreground font-mono mt-1">
+            Registration Dashboard • {currentUserEmail}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="cyber-outline" size="sm" onClick={() => navigate('/')}>
@@ -814,7 +858,16 @@ const Admin = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user);
+      // Check if user is authenticated AND whitelisted
+      if (user && isEmailWhitelisted(user.email)) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+        // Sign out if authenticated but not whitelisted
+        if (user && !isEmailWhitelisted(user.email)) {
+          signOut(auth);
+        }
+      }
       setLoading(false);
     });
 
