@@ -6,7 +6,10 @@ import { ScrollReveal } from './ScrollReveal';
 import { Check, Loader2, Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-
+// Import QR code images
+import csQR from '@/assets/cs.png';
+import ieeeQR from '@/assets/ieee.png';
+import nonIeeeQR from '@/assets/non ieee.png';
 
 // Firebase imports
 import { db } from '@/lib/firebase';
@@ -213,11 +216,11 @@ export const RegistrationForm = () => {
     return 549;
   };
 
-  // Get QR code path
+  // Get QR code image
   const getQRCode = () => {
-    if (formData.isIEEEMember === 'ieee-cs') return '/src/assets/cs.png';
-    if (formData.isIEEEMember === 'ieee') return '/src/assets/ieee.png';
-    return '/src/assets/non ieee.png';
+    if (formData.isIEEEMember === 'ieee-cs') return csQR;
+    if (formData.isIEEEMember === 'ieee') return ieeeQR;
+    return nonIeeeQR;
   };
 
   return (
