@@ -12,7 +12,7 @@ export const AboutSection = () => {
               <span>./about</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-4">
-              About <span className="text-primary neon-text">FROM CLICK TO CONTROL</span>
+              About <span className="text-primary neon-text">FROM CLICK TO CTRL</span>
             </h2>
           </div>
         </ScrollReveal>
@@ -62,7 +62,7 @@ Vivekanand V S</button>
               </div>
 
               <p className="text-foreground">
-             <span className="text-primary">  From Click to Control:</span> Browser Hacking is an immersive cybersecurity workshop that reveals what happens behind the scenes when users interact with web browsers. Designed for students and aspiring ethical hackers, it explores common browser-based attacks, the attacker’s mindset, and real-world exploitation through live demos. Built on the philosophy “Break to Build Better Security,” the session combines ethical, hands-on learning with practical defense techniques to help participants understand threats and protect themselves online.
+             <span className="text-primary">  FROM CLICK TO CTRL:</span> Browser Hacking is an immersive cybersecurity workshop that reveals what happens behind the scenes when users interact with web browsers. Designed for students and aspiring ethical hackers, it explores common browser-based attacks, the attacker’s mindset, and real-world exploitation through live demos. Built on the philosophy “Break to Build Better Security,” the session combines ethical, hands-on learning with practical defense techniques to help participants understand threats and protect themselves online.
               </p>
 
               <p className="text-muted-foreground">
