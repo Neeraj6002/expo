@@ -134,11 +134,11 @@ export const RegistrationForm = () => {
 
     try {
       // Calculate price based on membership type
-      let price = 999; // Default non-member price
+      let price = 459; // Default non-member price
       if (formData.isIEEEMember === 'ieee') {
-        price = 899;
+        price = 499;
       } else if (formData.isIEEEMember === 'ieee-cs') {
-        price = 799;
+        price = 449;
       }
 
       const isIEEE = formData.isIEEEMember !== 'no';
@@ -206,9 +206,16 @@ export const RegistrationForm = () => {
   
   // Calculate price dynamically
   const getPrice = () => {
-    if (formData.isIEEEMember === 'ieee') return 899;
-    if (formData.isIEEEMember === 'ieee-cs') return 799;
-    return 999;
+    if (formData.isIEEEMember === 'ieee') return 499;
+    if (formData.isIEEEMember === 'ieee-cs') return 449;
+    return 549;
+  };
+
+  // Get QR code path
+  const getQRCode = () => {
+    if (formData.isIEEEMember === 'ieee-cs') return '/src/assets/cs.jpeg';
+    if (formData.isIEEEMember === 'ieee') return '/src/assets/ieee.jpeg';
+    return '/src/assets/non ieee.jpeg';
   };
 
   return (
@@ -318,9 +325,9 @@ export const RegistrationForm = () => {
               onChange={handleInputChange}
               className="flex h-12 w-full rounded-md border-2 border-border bg-card px-4 py-2 text-base text-foreground font-mono ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:border-primary focus-visible:shadow-[0_0_15px_hsl(120_100%_50%/0.2)] md:text-sm appearance-none cursor-pointer"
             >
-              <option value="no">Not a IEEE member (₹999)</option>
-              <option value="ieee">IEEE member (₹899)</option>
-              <option value="ieee-cs">IEEE CS member (₹799)</option>
+              <option value="no">Not a IEEE member (₹549)</option>
+              <option value="ieee">IEEE member (₹499)</option>
+              <option value="ieee-cs">IEEE CS member (₹449)</option>
             </select>
           </div>
 
@@ -368,6 +375,42 @@ export const RegistrationForm = () => {
               ✓ IEEE CS Member Discount Applied (₹200 off)
             </p>
           )}
+        </motion.div>
+
+        {/* QR Code Display */}
+        <motion.div
+          className="bg-card/50 border-2 border-primary/20 rounded-lg p-6 backdrop-blur-sm"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-display font-bold text-foreground">
+              <span className="text-primary">&gt;</span> Scan to Pay
+            </h3>
+            <motion.div
+              key={formData.isIEEEMember}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="flex justify-center"
+            >
+              <div className="relative border-4 border-primary/30 rounded-lg p-2 bg-white">
+                <img
+                  src={getQRCode()}
+                  alt="Payment QR Code"
+                  className="w-64 h-64 object-contain"
+                />
+              </div>
+            </motion.div>
+            <div className="space-y-1">
+              <p className="text-sm font-mono text-muted-foreground">
+                Amount to pay: <span className="text-primary font-bold">₹{getPrice()}</span>
+              </p>
+              <p className="text-xs font-mono text-muted-foreground/60">
+                Scan with any UPI app (GPay, PhonePe, Paytm, etc.)
+              </p>
+            </div>
+          </div>
         </motion.div>
 
         {/* Payment Screenshot Upload */}
