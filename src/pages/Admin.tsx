@@ -55,6 +55,7 @@ const ADMIN_WHITELIST = [
   'gspk2006@gmail.com',
   'adithyanath.s10b@gmail.com',
   'ananthapadmanabhanprakash@ieee.org',
+  'pjneeraj6002@gmail.com',
   // Add more authorized emails here
 ];
 
