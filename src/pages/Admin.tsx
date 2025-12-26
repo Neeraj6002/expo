@@ -51,7 +51,10 @@ import {
 const ADMIN_WHITELIST = [
   'neerajj6002@gmail.com',
   'vivekexists@gmail.com',
-  'another.admin@domain.com',
+  'vigneshnarrayan@ieee.org',
+  'gspk2006@gmail.com',
+  'adithyanath.s10b@gmail.com',
+  'ananthapadmanabhanprakash@ieee.org',
   // Add more authorized emails here
 ];
 
