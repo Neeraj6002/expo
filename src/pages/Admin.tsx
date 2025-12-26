@@ -611,7 +611,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground">
-            <span className="text-primary">Click to Control</span> Admin
+            <span className="text-primary">FROM CLICK TO CTRL</span> Admin
           </h1>
           <p className="text-sm text-muted-foreground font-mono mt-1">Registration Dashboard</p>
         </div>
