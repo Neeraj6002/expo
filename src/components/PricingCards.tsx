@@ -7,14 +7,14 @@ export const PricingCards = () => {
       title: 'IEEE CS Members',
       price: 449,
       icon: Heart,
-      features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments', 'IEEE Member Discount'],
+      features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments', 'IEEE CS Member Discount'],
       highlighted: true,
     },
     {
       title: 'IEEE Members',
       price: 499,
       icon: Crown,
-      features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments', 'IEEE CS Member Discount'],
+      features: ['Full Event Access', 'Workshop Materials', 'Certificate', 'Refreshments', 'IEEE Member Discount'],
       highlighted: true,
     },
     {
