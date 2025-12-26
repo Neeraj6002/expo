@@ -215,9 +215,9 @@ export const RegistrationForm = () => {
 
   // Get QR code path
   const getQRCode = () => {
-    if (formData.isIEEEMember === 'ieee-cs') return '/src/assets/cs.jpeg';
-    if (formData.isIEEEMember === 'ieee') return '/src/assets/ieee.jpeg';
-    return '/src/assets/non ieee.jpeg';
+    if (formData.isIEEEMember === 'ieee-cs') return 'src/assets/cs.png';
+    if (formData.isIEEEMember === 'ieee') return 'src/assets/ieee.png';
+    return 'src/assets/non ieee.png';
   };
 
   return (
