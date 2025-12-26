@@ -33,7 +33,7 @@ export const Footer = () => {
           <div className="flex items-center gap-2">
             <Terminal className="w-6 h-6 text-primary" />
             <span className="font-display text-2xl font-bold text-primary neon-text">
-              FROM CLICK TO CTRL
+              CLICK TO CTRL
             </span>
           </div>
 
