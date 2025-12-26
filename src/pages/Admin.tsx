@@ -22,7 +22,8 @@ import {
   Search,
   Image,
   ZoomIn,
-  ShieldAlert
+  ShieldAlert,
+  Award
 } from 'lucide-react';
 
 import { auth, db } from '@/lib/firebase';
@@ -56,7 +57,6 @@ const ADMIN_WHITELIST = [
   'adithyanath.s10b@gmail.com',
   'ananthapadmanabhanprakash@ieee.org',
   'pjneeraj6002@gmail.com',
-  // Add more authorized emails here
 ];
 
 // Helper function to check if email is whitelisted
@@ -74,6 +74,7 @@ interface Registration {
   department?: string;
   year?: string;
   isIEEEMember: boolean;
+  isIEEECSMember?: boolean;
   ieeeNumber?: string;
   price: number;
   registeredAt: string;
@@ -133,7 +134,6 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
     setLoading(true);
     setError('');
 
-    // Check whitelist before attempting login
     if (!isEmailWhitelisted(email)) {
       setError('Access denied: Email not authorized');
       setLoading(false);
@@ -148,7 +148,6 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
-      // Double-check whitelist after successful authentication
       if (!isEmailWhitelisted(userCredential.user.email)) {
         await signOut(auth);
         setError('Access denied: Email not authorized');
@@ -189,7 +188,6 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       
-      // Check if the Google account email is whitelisted
       if (!isEmailWhitelisted(result.user.email)) {
         await signOut(auth);
         setError('Access denied: Email not authorized');
@@ -347,7 +345,6 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set current user email
     if (auth.currentUser?.email) {
       setCurrentUserEmail(auth.currentUser.email);
     }
@@ -370,7 +367,8 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
         regs.push({ 
           id: docSnapshot.id, 
           ...data,
-          approved: data.approved ?? false
+          approved: data.approved ?? false,
+          isIEEECSMember: data.isIEEECSMember ?? false
         } as Registration);
       });
       
@@ -433,7 +431,6 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       return;
     }
 
-    // Verify user is still whitelisted
     if (!isEmailWhitelisted(auth.currentUser.email)) {
       toast({
         title: 'Access Denied',
@@ -509,7 +506,6 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       return;
     }
 
-    // Verify user is still whitelisted
     if (!isEmailWhitelisted(auth.currentUser.email)) {
       toast({
         title: 'Access Denied',
@@ -573,6 +569,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       'Department',
       'Year',
       'IEEE Member',
+      'IEEE CS Member',
       'IEEE Number',
       'Price',
       'Approved',
@@ -588,6 +585,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       reg.department || 'N/A',
       reg.year || 'N/A',
       reg.isIEEEMember ? 'Yes' : 'No',
+      reg.isIEEECSMember ? 'Yes' : 'No',
       reg.ieeeNumber || 'N/A',
       reg.price,
       reg.approved ? 'Yes' : 'No',
@@ -629,16 +627,11 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
     }
   };
 
+  // Calculate statistics
   const totalRevenue = registrations.reduce((sum, r) => sum + r.price, 0);
-  const ieeeCount = registrations.filter(r => r.isIEEEMember).length;
-  const ieeeCSCount = registrations.filter(r => 
-    r.isIEEEMember && (
-      r.college.toLowerCase().includes('computer') ||
-      r.department?.toLowerCase().includes('computer') ||
-      r.department?.toLowerCase().includes('cs')
-    )
-  ).length;
-  const nonIeeeCount = registrations.length - ieeeCount;
+  const ieeeCSCount = registrations.filter(r => r.isIEEECSMember).length;
+  const ieeeOnlyCount = registrations.filter(r => r.isIEEEMember && !r.isIEEECSMember).length;
+  const nonIeeeCount = registrations.filter(r => !r.isIEEEMember && !r.isIEEECSMember).length;
   const approvedCount = registrations.filter(r => r.approved).length;
 
   return (
@@ -682,18 +675,18 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {[
-          { label: 'Total Registrations', value: registrations.length, icon: Users },
-          { label: 'Approved', value: approvedCount, icon: Check },
-          { label: 'IEEE Members', value: ieeeCount, icon: Crown },
-          { label: 'IEEE CS Members', value: ieeeCSCount, icon: Crown },
-          { label: 'Non-IEEE', value: nonIeeeCount, icon: User },
-          { label: 'Total Revenue', value: `₹${totalRevenue}`, icon: Users },
+          { label: 'Total Registrations', value: registrations.length, icon: Users, color: 'text-blue-500' },
+          { label: 'Approved', value: approvedCount, icon: Check, color: 'text-green-500' },
+          { label: 'IEEE CS Members', value: ieeeCSCount, icon: Award, color: 'text-purple-500' },
+          { label: 'IEEE Only', value: ieeeOnlyCount, icon: Crown, color: 'text-yellow-500' },
+          { label: 'Non-IEEE', value: nonIeeeCount, icon: User, color: 'text-gray-500' },
+          { label: 'Total Revenue', value: `₹${totalRevenue}`, icon: Users, color: 'text-primary' },
         ].map((stat) => (
           <div
             key={stat.label}
             className="bg-card/50 border border-border rounded-lg p-4 backdrop-blur-sm"
           >
-            <stat.icon className="w-5 h-5 text-primary mb-2" />
+            <stat.icon className={`w-5 h-5 ${stat.color} mb-2`} />
             <p className="text-2xl font-display font-bold text-foreground">{stat.value}</p>
             <p className="text-xs text-muted-foreground font-mono">{stat.label}</p>
           </div>
@@ -752,7 +745,7 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">College</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Dept</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Year</th>
-                  <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">IEEE</th>
+                  <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Membership</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Price</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Payment</th>
                   <th className="text-left p-4 text-xs font-mono text-muted-foreground uppercase">Date</th>
@@ -777,20 +770,24 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
                       <td className="p-4 text-sm font-mono text-muted-foreground">{reg.department || 'N/A'}</td>
                       <td className="p-4 text-sm font-mono text-muted-foreground">{reg.year || 'N/A'}</td>
                       <td className="p-4">
-                        {reg.isIEEEMember ? (
-                          <div className="flex flex-col">
-                            <span className="inline-flex items-center gap-1 text-xs font-mono text-primary">
-                              <Crown className="w-3 h-3" /> Yes
+                        <div className="flex flex-col gap-1">
+                          {reg.isIEEECSMember ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-mono text-purple-500">
+                              <Award className="w-3 h-3" /> IEEE CS
                             </span>
-                            {reg.ieeeNumber && (
-                              <span className="text-xs font-mono text-muted-foreground mt-1">
-                                #{reg.ieeeNumber}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-xs font-mono text-muted-foreground">No</span>
-                        )}
+                          ) : reg.isIEEEMember ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-mono text-yellow-500">
+                              <Crown className="w-3 h-3" /> IEEE
+                            </span>
+                          ) : (
+                            <span className="text-xs font-mono text-muted-foreground">Non-IEEE</span>
+                          )}
+                          {reg.ieeeNumber && (
+                            <span className="text-xs font-mono text-muted-foreground">
+                              #{reg.ieeeNumber}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="p-4 text-sm font-mono text-primary">₹{reg.price}</td>
                       <td className="p-4">
@@ -862,12 +859,10 @@ const Admin = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // Check if user is authenticated AND whitelisted
       if (user && isEmailWhitelisted(user.email)) {
         setIsLoggedIn(true);
       } else {
         setIsLoggedIn(false);
-        // Sign out if authenticated but not whitelisted
         if (user && !isEmailWhitelisted(user.email)) {
           signOut(auth);
         }
