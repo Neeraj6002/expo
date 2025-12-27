@@ -160,24 +160,35 @@ const handleSubmit = async (e: React.FormEvent) => {
     const uniqueId = `reg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const imageUrl = await uploadImageToSupabase(paymentScreenshot, uniqueId);
 
-    await addDoc(collection(db, 'registrations'), {
-      fullName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-      college: formData.college,
-      department: formData.department,
-      year: formData.year,
-      isIEEEMember: isIEEEMember,
-      isIEEECSMember: isIEEECSMember,
-      membershipType: membershipType,
-      ieeeNumber: isIEEEMember ? formData.ieeeNumber : '',
-      price,
-      registeredAt: new Date().toISOString(),
-      createdAt: serverTimestamp(),
-      paymentStatus: 'pending',
-      approved: false,
-      paymentScreenshotUrl: imageUrl,
-    });
+await addDoc(collection(db, 'registrations'), {
+  fullName: formData.fullName,
+  email: formData.email,
+  phone: formData.phone,
+  college: formData.college,
+  department: formData.department,
+  year: formData.year,
+
+  // Membership
+  isIEEEMember: isIEEEMember,
+  isIEEECSMember: isIEEECSMember,
+  membershipType: membershipType,
+  ieeeNumber: isIEEEMember ? formData.ieeeNumber : '',
+
+  // Payment
+  price,
+  paymentStatus: 'pending',
+  paymentScreenshotUrl: imageUrl,
+
+  // 🔥 Attendance (IMPORTANT)
+  attended: false,
+  attendedAt: null,
+
+  // Meta
+  approved: false,
+  registeredAt: new Date().toISOString(),
+  createdAt: serverTimestamp(),
+});
+
 
     setIsSuccess(true);
 
